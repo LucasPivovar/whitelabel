@@ -1,0 +1,38 @@
+.login-split { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; padding: 24px; background: #0c0d0c; color: #f4f5f4; letter-spacing: 0; }
+.login-split .login-intro, .login-split .login-main { min-width: 0; border: 1px solid #222522; border-radius: 24px; background: #101210; }
+.login-intro { display: flex; flex-direction: column; justify-content: space-between; gap: 56px; padding: 52px; }
+.login-intro .brand { padding: 0; gap: 12px; align-items: center; }
+.login-intro .brand > svg { width: 36px; height: 36px; padding: 7px; background: #96d600; color: #142000; border-radius: 8px; }
+.login-intro .brand .login-brand-name { display: block; color: #f4f5f4; font-size: 17px; font-weight: 700; line-height: 1.5; border: 0; padding: 0; background: transparent; }
+.login-brand-name small, .login-platform small { display: block; color: #898f89; font-size: 11px; font-weight: 400; }
+.login-eyebrow { display: inline-flex; align-items: center; gap: 8px; color: #a8d847; font-size: 10px; font-weight: 700; }
+.login-intro-copy h2 { font-size: 56px; line-height: 1.08; font-weight: 700; letter-spacing: 0; margin: 28px 0 24px; }
+.login-intro-copy p { max-width: 440px; color: #a5aaa5; font-size: 15px; line-height: 1.8; }
+.login-platform { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600; }
+.login-platform > svg { color: #96d600; }
+.login-platform small { margin-top: 4px; }
+.login-split .login-main { padding: 64px 40px; }
+.login-split .login-content { max-width: 360px; }
+.login-form-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.login-split .login-symbol { margin: 0; width: 36px; height: 36px; }
+.login-split .login-content h1 { font-size: 26px; font-weight: 650; margin-bottom: 6px; }
+.login-split .login-content > p { color: #929992; font-size: 13px; margin-bottom: 28px; }
+.login-split .field { margin-bottom: 18px; }
+.login-split .field > span { color: #a6ada6; font-size: 12px; }
+.login-split .field input { background: #edf2f8; color: #172018; border: 1px solid #ccd4dc; min-height: 46px; border-radius: 8px; }
+.login-split .field input::placeholder { color: #748078; }
+.login-split .field input:focus { outline: 2px solid #96d600; outline-offset: 2px; }
+.login-split .password-field > button { color: #536353; }
+.login-split .primary { margin-top: 0; border-radius: 8px; }
+.login-split .login-content .login-footnote { color: #858c85; font-size: 11px; margin: 22px 0 0; }
+@media (min-width: 1500px) { .login-split { padding: 32px; gap: 32px; } .login-intro { padding: 72px; } }
+@media (max-width: 1050px) { .login-intro { padding: 36px; } .login-intro-copy h2 { font-size: 42px; } .login-split .login-main { padding: 40px 28px; } }
+@media (max-width: 720px) {
+  .login-split { grid-template-columns: minmax(0, 1fr); padding: 16px; gap: 16px; align-content: center; }
+  .login-split .login-intro { padding: 20px 8px; border: 0; background: transparent; }
+  .login-intro-copy, .login-platform { display: none; }
+  .login-split .login-main { padding: 36px 24px; border-radius: 16px; }
+  .login-split .login-content h1 { font-size: 25px; }
+  .login-split .login-content .login-footnote { align-items: flex-start; line-height: 1.6; }
+  .login-footnote svg { flex-shrink: 0; margin-top: 2px; }
+}

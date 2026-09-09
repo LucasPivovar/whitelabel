@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import '@/app/login.css';
 import { useRouter } from 'next/navigation';
 import {
   ShieldCheck,
@@ -9,6 +10,7 @@ import {
   EyeOff,
   Zap,
   LockKeyhole,
+  Activity,
 } from '@/components/icons';
 export default function LoginForm({ invite }: { invite?: string }) {
   const router = useRouter();
@@ -18,14 +20,19 @@ export default function LoginForm({ invite }: { invite?: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   return (
-    <main className="login-page">
-      <header className="login-top">
+    <main className="login-page login-split">
+      <section className="login-intro" aria-label="TradingPro White Label">
         <Link href="/login" className="brand">
           <Zap fill="currentColor" />
-          TradingPro<span>console</span>
+          <span className="login-brand-name">TradingPro<small>Controle da plataforma</small></span>
         </Link>
-        <span>White Label</span>
-      </header>
+        <div className="login-intro-copy">
+          <span className="login-eyebrow"><ShieldCheck size={14} /> GESTÃO WHITE LABEL</span>
+          <h2>Uma visão clara<br />de toda a<br />operação.</h2>
+          <p>Tenants, checkouts, conexões e acessos reunidos em uma área desenhada para decisões rápidas.</p>
+        </div>
+        <div className="login-platform"><Activity size={20} /><span>Plataforma central<small>Gestão do ecossistema TradingPro</small></span></div>
+      </section>
       <div className="login-main">
         <form
           className="login-content"
@@ -55,14 +62,15 @@ export default function LoginForm({ invite }: { invite?: string }) {
             }
           }}
         >
-          <div className="login-symbol">
-            <ShieldCheck size={25} />
+          <div className="login-form-heading">
+            <span className="login-symbol"><ShieldCheck size={20} /></span>
+            <span className="login-eyebrow">PAINEL DA PLATAFORMA</span>
           </div>
-          <h1>{invite ? 'Ative sua conta' : 'Bem-vindo de volta'}</h1>
+          <h1>{invite ? 'Ative sua conta' : 'Entre na sua conta'}</h1>
           <p>
             {invite
               ? 'Defina sua senha para acessar a operação.'
-              : 'Entre para gerenciar sua plataforma.'}
+              : 'Use suas credenciais de administrador.'}
           </p>
           {!invite && (
             <label className="field">
@@ -115,10 +123,6 @@ export default function LoginForm({ invite }: { invite?: string }) {
           </p>
         </form>
       </div>
-      <footer className="login-footer">
-        <span>TradingPro © {new Date().getFullYear()}</span>
-        <span>White Label Console</span>
-      </footer>
     </main>
   );
 }
