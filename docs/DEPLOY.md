@@ -1,5 +1,11 @@
 # GitHub e Vercel
 
+## Prototipo ativo
+
+O `vercel.json` ativa `DEMO_MODE=true`. Nesse modo, o servidor usa SQLite temporario em `/tmp`, sem Turso ou variaveis de admin. Login: `admin@tradingpro.io` / `DemoAdmin2026!` e `tenant@tradingpro.io` / `DemoTenant2026!`. Sao credenciais publicas exclusivas de demonstracao.
+
+Dados, imagens e sessoes podem desaparecer quando uma instancia for recriada. Instancias diferentes podem ter bancos diferentes; isso pode exigir novo login. Todos os visitantes compartilham os dados ficticios daquela instancia. Nao inserir dados reais. Para uso persistente, altere DEMO_MODE para false e configure o Turso conforme abaixo.
+
 O diretorio `painel` e a raiz da aplicacao Next.js. A publicacao nao depende de Sites ou Cloudflare Workers.
 
 Frontend React e backend ficam neste mesmo repositorio e no mesmo projeto Vercel. As paginas sao servidas por `app/` e as APIs por `app/api/`, no mesmo dominio. Nao e necessario hospedar Express, configurar CORS ou criar um segundo deploy. Apenas o banco persistente fica no Turso.

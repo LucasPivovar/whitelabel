@@ -7,6 +7,7 @@ import {
 import { promisify } from 'node:util';
 import { cookies } from 'next/headers';
 import { query } from './database';
+import { demoEnabled } from './demo';
 const scrypt = promisify(scryptCallback);
 export const cookieName = 'tradingpro_session';
 export function digest(token: string) {
@@ -28,6 +29,7 @@ export function validPassword(value: unknown) {
   return typeof value === 'string' && value.length >= 12 && value.length <= 128;
 }
 export async function seedAdmin() {
+  if (demoEnabled()) return;
   const email = process.env.ADMIN_EMAIL?.trim().toLowerCase(),
     password = process.env.ADMIN_PASSWORD;
   if (!email || !validPassword(password))

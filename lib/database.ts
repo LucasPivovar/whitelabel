@@ -1,16 +1,23 @@
 import { createClient, type Client, type InValue } from '@libsql/client';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { randomBytes, scryptSync } from 'node:crypto';
+import { demoEnabled, demoAccounts } from './demo';
+import { initialState, newCheckout } from './model';
 let client: Client | undefined;
 let ready: Promise<void> | undefined;
 function connection() {
   if (!client) {
-    const url = process.env.TURSO_DATABASE_URL;
+    const url = demoEnabled()
+      ? `file:${join(tmpdir(), 'tradingpro-demo-v1.db').replaceAll('\\', '/')}`
+      : process.env.TURSO_DATABASE_URL;
     if (!url)
       throw Error(
         'Configure TURSO_DATABASE_URL e execute npm run setup no ambiente local.',
       );
-    if (process.env.VERCEL && url.startsWith('file:'))
+    if (process.env.VERCEL && !demoEnabled() && url.startsWith('file:'))
       throw Error('A Vercel exige um banco remoto Turso.');
-    client = createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
+    client = createClient({ url, authToken: demoEnabled() ? undefined : process.env.TURSO_AUTH_TOKEN });
   }
   return client;
 }
@@ -30,7 +37,28 @@ export async function initialize() {
         ],
         'write',
       )
-      .then(() => {})
+      .then(async () => {
+        if (!demoEnabled()) return;
+        const db = connection();
+        const existing = await db.execute("SELECT owner FROM workspaces WHERE owner='demo-admin'");
+        if (existing.rows.length) return;
+        const state = initialState(demoAccounts[1].email);
+        state.tenants[0].id = '10000000-0000-4000-8000-000000000001';
+        state.tenants[0].admin = 'Administrador Demo';
+        state.checkouts = [newCheckout(state.tenants[0])];
+        state.checkouts[0].id = '20000000-0000-4000-8000-000000000001';
+        state.checkouts[0].published = true;
+        state.checkouts[0].publishedData = JSON.stringify(state.checkouts[0]);
+        state.activity = [{ id: crypto.randomUUID(), text: 'Ambiente de demonstração iniciado', time: new Date().toISOString() }];
+        await db.batch([
+          ...demoAccounts.map((account) => {
+            const salt = randomBytes(16).toString('hex');
+            const password = `${salt}:${scryptSync(account.password, salt, 64).toString('hex')}`;
+            return { sql: 'INSERT OR IGNORE INTO accounts(id,email,password,created) VALUES(?,?,?,?)', args: [account.id, account.email, password, Date.now()] };
+          }),
+          { sql: 'INSERT OR IGNORE INTO workspaces(owner,data,revision) VALUES(?,?,0)', args: ['demo-admin', JSON.stringify(state)] },
+        ], 'write');
+      })
       .catch((e) => {
         ready = undefined;
         throw e;

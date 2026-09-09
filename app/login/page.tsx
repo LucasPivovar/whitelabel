@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/auth';
 import LoginForm from '@/components/login-form';
+import { demoEnabled } from '@/lib/demo';
 export const dynamic = 'force-dynamic';
 export default async function Page({
   searchParams,
@@ -9,5 +10,5 @@ export default async function Page({
 }) {
   const params = await searchParams;
   if (!params.invite && (await getUser())) redirect('/');
-  return <LoginForm invite={params.invite} />;
+  return <LoginForm invite={params.invite} demo={demoEnabled()} />;
 }

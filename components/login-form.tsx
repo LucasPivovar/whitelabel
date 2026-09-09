@@ -12,7 +12,7 @@ import {
   LockKeyhole,
   Activity,
 } from '@/components/icons';
-export default function LoginForm({ invite }: { invite?: string }) {
+export default function LoginForm({ invite, demo = false }: { invite?: string; demo?: boolean }) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -121,6 +121,7 @@ export default function LoginForm({ invite }: { invite?: string }) {
             <LockKeyhole size={13} />
             Acesso restrito aos administradores da plataforma.
           </p>
+          {demo && <p className="login-footnote">Demonstração com dados fictícios. As alterações podem ser apagadas.</p>}
         </form>
       </div>
     </main>
