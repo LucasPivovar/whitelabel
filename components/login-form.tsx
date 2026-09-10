@@ -11,6 +11,7 @@ import {
   Zap,
   LockKeyhole,
   Activity,
+  Check,
 } from '@/components/icons';
 export default function LoginForm({ invite, demo = false }: { invite?: string; demo?: boolean }) {
   const router = useRouter();
@@ -24,14 +25,25 @@ export default function LoginForm({ invite, demo = false }: { invite?: string; d
       <section className="login-intro" aria-label="TradingPro White Label">
         <Link href="/login" className="brand">
           <Zap fill="currentColor" />
-          <span className="login-brand-name">TradingPro<small>Controle da plataforma</small></span>
+          <span className="login-brand-name">TradingPro<small>Console White Label</small></span>
         </Link>
         <div className="login-intro-copy">
           <span className="login-eyebrow"><ShieldCheck size={14} /> GESTÃO WHITE LABEL</span>
           <h2>Uma visão clara<br />de toda a<br />operação.</h2>
-          <p>Tenants, checkouts, conexões e acessos reunidos em uma área desenhada para decisões rápidas.</p>
+          <p>Tenants, checkouts de alta conversão, domínios próprios e conexões de corretoras reunidos em uma infraestrutura desenhada para decisões rápidas.</p>
+          <div className="login-feature-pills">
+            <span className="feature-pill"><Check size={13} /> Multi-tenant Isolado</span>
+            <span className="feature-pill"><Check size={13} /> SSL Wildcard Dedicado</span>
+            <span className="feature-pill"><Check size={13} /> Snapshots SHA-256</span>
+          </div>
         </div>
-        <div className="login-platform"><Activity size={20} /><span>Plataforma central<small>Gestão do ecossistema TradingPro</small></span></div>
+        <div className="login-platform">
+          <Activity size={20} />
+          <div>
+            <span>Infraestrutura da Plataforma</span>
+            <small>Status 100% Operacional · Latência ~15ms</small>
+          </div>
+        </div>
       </section>
       <div className="login-main">
         <form
@@ -83,6 +95,43 @@ export default function LoginForm({ invite, demo = false }: { invite?: string; d
               : 'Use suas credenciais de administrador.'}
           </p>
           {!invite && (
+            <div className="quick-access-panel">
+              <button
+                type="button"
+                className="quick-access-btn"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  setError('');
+                  try {
+                    const r = await fetch('/api/auth/quick-login', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                    });
+                    const data = await r.json();
+                    if (!r.ok) throw Error(data.error || 'Não foi possível entrar.');
+                    window.location.assign('/');
+                  } catch (err) {
+                    setError((err as Error).message);
+                    setBusy(false);
+                  }
+                }}
+              >
+                <div className="quick-btn-content">
+                  <span className="quick-icon-wrap"><Zap size={16} fill="currentColor" /></span>
+                  <div>
+                    <strong>Entrar com 1 clique</strong>
+                    <small>Acesso Super Admin (admin@tradingpro.io)</small>
+                  </div>
+                </div>
+                <ArrowUpRight size={16} />
+              </button>
+              <div className="quick-access-divider">
+                <span>ou preencha os dados</span>
+              </div>
+            </div>
+          )}
+          {!invite && (
             <label className="field">
               <span>E-mail</span>
               <input
@@ -124,9 +173,24 @@ export default function LoginForm({ invite, demo = false }: { invite?: string; d
             </p>
           )}
           <button className="primary" disabled={busy}>
-            {busy ? 'Entrando…' : invite ? 'Ativar conta' : 'Entrar'}
+            {busy ? 'Autenticando…' : invite ? 'Ativar conta' : 'Entrar no Console'}
             <ArrowUpRight size={17} />
           </button>
+          {!invite && (
+            <div className="quick-autofill-row">
+              <span>Ambiente local:</span>
+              <button
+                type="button"
+                className="autofill-link"
+                onClick={() => {
+                  setEmail('admin@tradingpro.io');
+                  setPassword('BY7Nt7AxjCeJTo4iBUqS');
+                }}
+              >
+                Preencher credenciais de teste
+              </button>
+            </div>
+          )}
           <p className="login-footnote">
             <LockKeyhole size={13} />
             Acesso restrito aos administradores da plataforma.

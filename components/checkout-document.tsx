@@ -64,6 +64,8 @@ export default function CheckoutDocument({
   const cssVars = {
     fontFamily: `${d.font},sans-serif`,
     background: c.background,
+    width: '100%',
+    boxSizing: 'border-box',
     '--document-width': `${d.maxWidth}px`,
     '--document-padding': `${d.padding}px`,
     '--document-mobile-padding': `${d.mobilePadding}px`,
@@ -130,7 +132,7 @@ export default function CheckoutDocument({
         return (
           <div className="document-price">
             <strong>{money(c.price)}</strong>
-            <small>pagamento único</small>
+            <small>{b.content || 'pagamento único'}</small>
           </div>
         );
       case 'benefits':

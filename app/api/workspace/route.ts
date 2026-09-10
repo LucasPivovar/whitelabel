@@ -109,6 +109,13 @@ export async function POST(request: Request) {
         throw Error('FORBIDDEN');
       s.checkouts = s.checkouts.filter((x) => x.id !== c.id);
       event = `Excluiu o checkout ${c.name}`;
+    } else if (body.action === 'settings') {
+      if (w.role !== 'admin') throw Error('FORBIDDEN');
+      s.settings = {
+        ...(s.settings || {}),
+        ...body.value,
+      };
+      event = 'Atualizou as configurações globais da plataforma';
     } else throw Error('Ação desconhecida.');
     s.activity = [
       { id: crypto.randomUUID(), text: event, time: new Date().toISOString() },
