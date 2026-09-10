@@ -210,6 +210,10 @@ export default function CheckoutDocument({
             }}
           >
             <h2>{d.form.title}</h2>
+            <fieldset className="checkout-payment-methods">
+              <legend>Forma de pagamento</legend>
+              {(c.paymentMethods || ['pix', 'boleto', 'card']).map((method, index) => <label key={method}><input type="radio" name="payment-method" value={method} defaultChecked={index === 0} /><span>{{pix: 'Pix', boleto: 'Boleto', card: 'Cartão de crédito'}[method]}</span></label>)}
+            </fieldset>
             <div className="document-fields">
               {d.form.fields
                 .filter((f) => f.enabled)

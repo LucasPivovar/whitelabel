@@ -14,6 +14,7 @@ export type Tenant = {
 };
 export type Review = { id: string; name: string; text: string; rating: number };
 export type Checkout = {
+  paymentMethods?: ('pix' | 'boleto' | 'card')[];
   id: string;
   tenantId: string;
   name: string;
@@ -169,6 +170,7 @@ export function validateTenant(t: Tenant) {
     throw Error('Informe um domínio válido, sem https://.');
 }
 export function validateCheckout(c: Checkout) {
+  if (c.paymentMethods !== undefined && (!Array.isArray(c.paymentMethods) || !c.paymentMethods.length || c.paymentMethods.length > 3 || new Set(c.paymentMethods).size !== c.paymentMethods.length || c.paymentMethods.some(m => !['pix', 'boleto', 'card'].includes(m)))) throw Error('Selecione pelo menos uma forma de pagamento válida.');
   if (c?.design) validateDesign(c.design);
   requireStrings(c, [
     'id',

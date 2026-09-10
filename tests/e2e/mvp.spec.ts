@@ -14,7 +14,7 @@ test('login, role switch, visual editor, responsive preview and reload',async({p
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width:1440,height:1000});await login(page);
  await expect(page.locator('.metric-line')).toHaveCount(0);await expect(page.getByText('Conexões Robox',{exact:true})).toHaveCount(0);
  await page.screenshot({path:'outputs/admin-desktop.png',fullPage:true});
- await page.getByRole('tab',{name:'Tenant',exact:true}).click();await expect(page.getByRole('heading',{name:'Checkouts',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Nova operação'})).toHaveCount(0);
+ await page.getByRole('tab',{name:'Tenant',exact:true}).click();await expect(page.getByRole('heading',{name:'Visão geral',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Nova operação'})).toHaveCount(0);await page.getByRole('button',{name:'Gerenciar checkouts'}).click();
  await page.getByRole('button',{name:'Editar Plano Pro',exact:true}).click();await expect(page.locator('.builder2')).toBeVisible();
  await page.locator('.layer-name').filter({hasText:'Título'}).click();await page.getByRole('tab',{name:'Estilo',exact:true}).click();await page.getByRole('spinbutton',{name:'Tamanho',exact:true}).fill('38');
  await expect(page.locator('.document-block.kind-title')).toHaveCSS('font-size','38px');
@@ -35,7 +35,7 @@ test('tenant invitation, authorization, publication snapshots and upload',async(
  await login(page);let s=await state(page.request);const first=s.state.tenants[0];const id=crypto.randomUUID();const t={...first,id,name:'Tenant de teste',slug:`test-${id}`,email:`tenant-${id}@example.test`,connections:[]};
  let r=await save(page.request,s,'tenant',t);expect(r.status()).toBe(200);s=await r.json();
  const inviteResponse=await page.request.post('/api/auth/invite',{headers:{origin},data:{tenantId:id}});expect(inviteResponse.status()).toBe(200);const invitation=await inviteResponse.json();
- const ctx=await browser.newContext({baseURL:origin});const tp=await ctx.newPage();await tp.goto(invitation.url);await tp.getByLabel('Crie uma senha',{exact:true}).fill('Tenant-Test-Password-2026');await tp.getByRole('button',{name:'Ativar conta'}).click();await expect(tp.getByRole('heading',{name:'Checkouts',exact:true})).toBeVisible();await expect(tp.getByRole('tab',{name:'Super admin'})).toBeDisabled();
+ const ctx=await browser.newContext({baseURL:origin});const tp=await ctx.newPage();await tp.goto(invitation.url);await tp.getByLabel('Crie uma senha',{exact:true}).fill('Tenant-Test-Password-2026');await tp.getByRole('button',{name:'Ativar conta'}).click();await expect(tp.getByRole('heading',{name:'Visão geral',exact:true})).toBeVisible();await expect(tp.getByRole('tab',{name:'Super admin'})).toBeDisabled();
  let ts=await state(ctx.request);expect(ts.state.tenants).toHaveLength(1);expect(ts.state.tenants[0].id).toBe(id);
  r=await save(ctx.request,ts,'tenant',{...first,name:'Intrusion'});expect(r.status()).toBe(403);
  r=await save(ctx.request,ts,'tenant',{...t,connections:['Bybit']});expect(r.status()).toBe(200);ts=await r.json();expect(ts.state.tenants[0].connections).toEqual([]);

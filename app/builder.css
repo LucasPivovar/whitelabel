@@ -1202,6 +1202,30 @@
 .demo-switcher button:disabled { opacity: .5; }
 body:has(.demo-switcher) .panel-main { padding-bottom: 110px; }
 body:has(.builder2) .demo-switcher { display: none; }
+body:has(.demo-switcher) .role-toolbar .role-tabs { display: none; }
+body:has(.demo-switcher) .content { padding-bottom: 120px; }
+.tenant-settings { display: grid; grid-template-columns: minmax(0, 480px) minmax(0, 300px); gap: 64px; padding: 24px 0; }
+.tenant-settings-fields { display: grid; gap: 20px; align-content: start; }
+.settings-actions, .overview-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.settings-status, .tenant-brand-preview p { color: #9ca697; font-size: 13px; overflow-wrap: anywhere; }
+.tenant-brand-preview { padding: 32px; border-top: 3px solid; text-align: center; align-self: start; background: #20241e; }
+.tenant-brand-preview img { width: 80px; height: 80px; object-fit: contain; margin: 0 auto 20px; }
+.tenant-brand-preview h2 { margin: 16px 0; overflow-wrap: anywhere; }
+.tenant-brand-preview .brand-swatch { display: block; width: 32px; height: 32px; border-radius: 4px; margin: 20px auto 0; }
+.overview-brand { display: flex; align-items: center; gap: 24px; padding: 24px 0 36px; border-bottom: 1px solid #ffffff15; flex-wrap: wrap; }
+.overview-brand img { width: 64px; height: 64px; object-fit: contain; }
+.overview-brand > div { flex: 1; min-width: 180px; overflow-wrap: anywhere; }
+.overview-brand p { margin: 8px 0; color: #a4ae9d; }
+.overview-brand small { color: #a4ae9d; }
+.overview-stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 32px 0; gap: 20px; }
+.overview-stats strong, .overview-stats span { display: block; }
+.overview-stats strong { font-size: 30px; margin-bottom: 10px; }
+.overview-stats span { font-size: 13px; color: #a4ae9d; }
+@media(max-width: 720px) { .tenant-settings { grid-template-columns: minmax(0, 1fr); gap: 24px; } .overview-stats { gap: 12px; } }
+.checkout-payment-methods { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; padding: 12px 0; border: 0; }
+.checkout-payment-methods legend { font-size: 14px; font-weight: 600; }
+.checkout-payment-methods label { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.checkout-payment-methods input { width: 16px !important; height: 16px !important; min-height: 0 !important; accent-color: var(--accent, #96d600); }
 .login-page {
   min-height: 100dvh;
   background: #171917;

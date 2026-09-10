@@ -1,5 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+void test('payment methods reject empty and unknown choices', () => {
+  const c = initialState('test@example.test').checkouts[0];
+  validateCheckout({ ...c, paymentMethods: ['pix', 'card'] });
+  assert.throws(() => validateCheckout({ ...c, paymentMethods: [] }));
+  assert.throws(() => validateCheckout({ ...c, paymentMethods: ['pix', 'pix'] }));
+});
 import { initialState, validateCheckout } from '../lib/model';
 import {
   withDesign,

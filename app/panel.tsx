@@ -73,6 +73,7 @@ import { registerCheckoutNavigation } from '@/lib/webmcp';
 import Builder from '@/components/checkout-builder';
 import RoleToolbar from '@/components/role-toolbar';
 import AccountInvite from '@/components/account-invite';
+import TenantSettings, { PlatformLink } from '@/components/tenant-settings';
 
 export function Field({
   label,
@@ -253,7 +254,7 @@ export default function Panel() {
       setSession(data);
       if (data.role === 'tenant') {
         setTenantId(data.tenantId || '');
-        setView('checkouts');
+        setView('overview');
       }
     } catch (e) {
       setError(String((e as Error).message));
@@ -382,6 +383,7 @@ export default function Panel() {
       </main>
     );
   const titles: Record<string, string> = {
+    overview: 'Visão geral',
     tenants: 'Operações white label',
     checkouts: 'Checkouts',
     connections: 'Conexões',
@@ -410,6 +412,7 @@ export default function Panel() {
           <SidebarMenu>
             {(tenant
               ? [
+                  ['overview', 'Visão geral', Building2],
                   ['checkouts', 'Checkouts', PanelsTopLeft],
                   ['identity', 'Identidade visual', Palette],
                   ['domains', 'Domínios', Globe],
@@ -463,7 +466,7 @@ export default function Panel() {
               {session.email.slice(0, 2).toUpperCase()}
             </span>
             <div>
-              {admin ? 'Administrador' : 'Admin da operação'}
+              {admin ? 'Administrador' : tenant?.admin || 'Admin da operação'}
               <small title={session.email}>{session.email}</small>
             </div>
           </div>
@@ -483,7 +486,7 @@ export default function Panel() {
             tenants={tenants}
             onChange={(id) => {
               setTenantId(id);
-              go(id ? 'checkouts' : 'tenants');
+              go(id ? 'overview' : 'tenants');
             }}
           />
         </header>
@@ -495,7 +498,7 @@ export default function Panel() {
               </div>
               <h1>{titles[view]}</h1>
               <p>
-                {view === 'tenants'
+                {view === 'overview' ? 'Sua plataforma e seus acessos.' : view === 'tenants'
                   ? 'Todas as suas operações, em um só lugar.'
                   : view === 'checkouts'
                     ? 'Sua oferta. Sua identidade. Seu checkout.'
@@ -888,7 +891,13 @@ export default function Panel() {
               ))}
             </div>
           )}
-          {view === 'domains' && (
+          {view === 'overview' && tenant && <section className="tenant-overview">
+            <div className="overview-brand">{tenant.logo && <img src={tenant.logo} alt="" />}<div><h2>{tenant.name}</h2><p>{tenant.domain || `${tenant.slug}.tradingpro.io`}</p><small>{tenant.status === 'active' ? 'Operação ativa' : 'Operação suspensa'} · DNS não verificado</small></div><PlatformLink tenant={tenant} /></div>
+            <div className="overview-stats"><div><strong>{checkouts.length}</strong><span>Checkouts</span></div><div><strong>{checkouts.filter(c => c.published).length}</strong><span>Publicados</span></div><div><strong>{tenant.connections.length}</strong><span>Conexões liberadas</span></div></div>
+            <div className="overview-links"><button className="secondary" onClick={() => go('checkouts')}>Gerenciar checkouts</button><button className="secondary" onClick={() => go('identity')}>Editar identidade visual</button><button className="secondary" onClick={() => go('domains')}>Configurar domínio</button></div>
+          </section>}
+          {tenant && (view === 'identity' || view === 'domains') && <TenantSettings key={`${tenant.id}-${view}`} tenant={tenant} mode={view} busy={busy} onSave={t => mutate('tenant', t)} />}
+          {view === 'domains' && !tenant && (
             <div className="settings-list">
               {(tenant ? [tenant] : tenants).map((t) => (
                 <section className="domain-row" key={t.id}>
@@ -915,34 +924,6 @@ export default function Panel() {
                   </button>
                 </section>
               ))}
-            </div>
-          )}
-          {view === 'identity' && tenant && (
-            <div className="identity-page">
-              <div
-                className="identity-preview"
-                style={{ borderTopColor: tenant.color }}
-              >
-                <Avatar tenant={tenant} />
-                <h2>{tenant.name}</h2>
-                <p>{tenant.slug}.tradingpro.io</p>
-                <span
-                  className="brand-swatch"
-                  style={{ background: tenant.color }}
-                />
-                {tenant.color.toUpperCase()}
-              </div>
-              <div>
-                <h2>Identidade da operação</h2>
-                <p>Nome, logo e cor principal</p>
-                <button
-                  className="primary"
-                  onClick={() => setEditTenant({ ...tenant })}
-                >
-                  <Palette size={17} />
-                  Personalizar identidade
-                </button>
-              </div>
             </div>
           )}
           {view === 'activity' && (

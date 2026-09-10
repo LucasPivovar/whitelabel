@@ -976,6 +976,16 @@ export default function CheckoutBuilder({
             )}
           </>
         );
+      case 'payments':
+        return <div className="payment-settings">
+          {(['pix', 'boleto', 'card'] as const).map(method => {
+            const methods = c.paymentMethods || ['pix', 'boleto', 'card'];
+            return <Toggle key={method} label={{pix: 'Pix', boleto: 'Boleto', card: 'Cartão de crédito'}[method]} value={methods.includes(method)} onChange={enabled => {
+              if (!enabled && methods.length === 1) { onError('Mantenha pelo menos uma forma de pagamento.'); return; }
+              update('paymentMethods', enabled ? [...methods, method] as NonNullable<Checkout['paymentMethods']> : methods.filter(m => m !== method) as NonNullable<Checkout['paymentMethods']>);
+            }} />;
+          })}
+        </div>;
       case 'tracking':
         return (
           <>
@@ -1055,6 +1065,7 @@ export default function CheckoutBuilder({
       tracking: 'Meta e pixels',
       conversion: 'Conversão',
       notifications: 'Notificações',
+      payments: 'Formas de pagamento',
       button: 'Botão de compra',
     }[selected] ||
     'Propriedades';
@@ -1235,6 +1246,7 @@ export default function CheckoutBuilder({
                   [
                     ['page', 'Página e layout', LayoutTemplate],
                     ['offer', 'Dados da oferta', Tag],
+                    ['payments', 'Formas de pagamento', Tag],
                     ['tracking', 'Meta e pixels', Activity],
                     ['conversion', 'Upsell e conversão', Megaphone],
                     ['notifications', 'Notificações', Mail],
