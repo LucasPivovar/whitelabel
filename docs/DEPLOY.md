@@ -2,6 +2,8 @@
 
 ## Prototipo ativo
 
+No modo demo, o formulario aceita qualquer preenchimento (ou campos vazios) e abre o tenant. O seletor fixo no canto inferior direito alterna Tenant/Super admin. A identidade demo nao depende de sessoes SQLite; o cookie apenas seleciona o perfil. A rota `/` tambem abre diretamente o tenant sem login. Esse acesso livre existe apenas com DEMO_MODE=true.
+
 O `vercel.json` ativa `DEMO_MODE=true`. Nesse modo, o servidor usa SQLite temporario em `/tmp`, sem Turso ou variaveis de admin. Login: `admin@tradingpro.io` / `DemoAdmin2026!` e `tenant@tradingpro.io` / `DemoTenant2026!`. Sao credenciais publicas exclusivas de demonstracao.
 
 Dados, imagens e sessoes podem desaparecer quando uma instancia for recriada. Instancias diferentes podem ter bancos diferentes; isso pode exigir novo login. Todos os visitantes compartilham os dados ficticios daquela instancia. Nao inserir dados reais. Para uso persistente, altere DEMO_MODE para false e configure o Turso conforme abaixo.

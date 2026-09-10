@@ -1194,6 +1194,14 @@
   align-items: center;
   color: #9aae89;
 }
+.demo-switcher { position: fixed; right: 16px; bottom: 16px; z-index: 100; padding: 10px; max-width: calc(100vw - 32px); border: 1px solid #46513b; background: #161b14; color: #edf4e8; border-radius: 8px; box-shadow: 0 4px 20px #0005; }
+.demo-switcher small { display: block; font-size: 9px; color: #a5bb91; margin-bottom: 6px; }
+.demo-switcher > div { display: flex; gap: 6px; }
+.demo-switcher button { display: flex; align-items: center; gap: 6px; padding: 8px 10px; font-size: 12px; border-radius: 4px; background: #2c3524; }
+.demo-switcher button:hover { background: #405032; }
+.demo-switcher button:disabled { opacity: .5; }
+body:has(.demo-switcher) .panel-main { padding-bottom: 110px; }
+body:has(.builder2) .demo-switcher { display: none; }
 .login-page {
   min-height: 100dvh;
   background: #171917;

@@ -7,7 +7,7 @@ import {
 import { promisify } from 'node:util';
 import { cookies } from 'next/headers';
 import { query } from './database';
-import { demoEnabled } from './demo';
+import { demoEnabled, demoAccounts } from './demo';
 const scrypt = promisify(scryptCallback);
 export const cookieName = 'tradingpro_session';
 export function digest(token: string) {
@@ -46,6 +46,11 @@ export async function seedAdmin() {
   }
 }
 export async function getUser() {
+  if (demoEnabled()) {
+    const role = (await cookies()).get('tradingpro_demo_role')?.value;
+    const account = demoAccounts[role === 'admin' ? 0 : 1];
+    return { id: account.id, email: account.email };
+  }
   const token = (await cookies()).get(cookieName)?.value;
   if (!token) return null;
   const r = await query(

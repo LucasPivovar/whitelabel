@@ -36,11 +36,21 @@ export default function LoginForm({ invite, demo = false }: { invite?: string; d
       <div className="login-main">
         <form
           className="login-content"
+          noValidate={demo}
           onSubmit={async (e) => {
             e.preventDefault();
             setBusy(true);
             setError('');
             try {
+              if (demo) {
+                const response = await fetch('/api/demo/role', {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ role: 'tenant' }),
+                });
+                if (!response.ok) throw Error('Não foi possível abrir a demonstração.');
+                window.location.assign('/');
+                return;
+              }
               const r = await fetch(
                 invite ? '/api/auth/invite' : '/api/auth/login',
                 {

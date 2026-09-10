@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import './panel.css';
 import './builder.css';
+import { demoEnabled } from '@/lib/demo';
+import DemoSwitcher from '@/components/demo-switcher';
 export const metadata: Metadata = {
   title: 'TradingPro | White Label',
   description: 'Gestão de operações, identidade e checkouts TradingPro.',
@@ -25,7 +27,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>{children}{demoEnabled() && <DemoSwitcher />}</body>
     </html>
   );
 }

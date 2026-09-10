@@ -9,6 +9,6 @@ export default async function Page({
   searchParams: Promise<{ invite?: string }>;
 }) {
   const params = await searchParams;
-  if (!params.invite && (await getUser())) redirect('/');
+  if (!demoEnabled() && !params.invite && (await getUser())) redirect('/');
   return <LoginForm invite={params.invite} demo={demoEnabled()} />;
 }
