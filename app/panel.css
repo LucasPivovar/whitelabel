@@ -197,7 +197,7 @@ a {
 .brand > svg {
   color: #96d600;
 }
-.brand > span {
+.sidebar .brand > span.brand-tag {
   font-family: Inter, sans-serif;
   font-size: 10px;
   line-height: 16px;
@@ -206,6 +206,7 @@ a {
   border-radius: 3px;
   color: #a4b495;
 }
+
 .workspace-label {
   margin: 3px 10px 22px;
   border: 1px solid #ffffff16;
@@ -2939,6 +2940,133 @@ a {
   display: flex;
   flex-direction: column;
   gap: 22px;
+}
+
+/* ==========================================================================
+   Comprehensive Global Responsiveness (Mobile & Tablet)
+   ========================================================================== */
+@media (max-width: 900px) {
+  .tenant-settings-page-container {
+    gap: 16px;
+  }
+  .settings-cards-grid {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tenant-settings-page-container {
+    gap: 14px;
+  }
+
+  .settings-card-header {
+    padding: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .settings-card-header .icon-wrap {
+    width: 36px;
+    height: 36px;
+  }
+
+  .settings-card-header h2 {
+    font-size: 15px;
+  }
+
+  .settings-card-header p {
+    font-size: 11.5px;
+  }
+
+  .settings-card-body {
+    padding: 16px;
+  }
+
+  .domain-display-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .domain-display-box > div:last-child {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .brand-preview-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .brand-preview-banner > div:last-child {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* Tables horizontal scroll container */
+  .table-container,
+  .table-wrap,
+  .overflow-auto {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Dialogs and Modals on mobile */
+  .dialog-content,
+  .tenant-dialog,
+  .modal-box {
+    width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+    margin: 16px auto !important;
+    padding: 18px !important;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-sizing: border-box !important;
+  }
+
+  /* Form actions wrapping on mobile */
+  .form-actions,
+  .modal-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .form-actions > button,
+  .modal-actions > button {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-card-header {
+    padding: 14px 12px;
+  }
+
+  .settings-card-body {
+    padding: 14px 12px;
+  }
+
+  .settings-card-header h2 {
+    font-size: 14px;
+  }
+
+  .preview-card-section .settings-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .preview-card-section .settings-card-header > div:last-child {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

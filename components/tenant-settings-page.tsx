@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import type { Tenant, Session } from '@/lib/model';
 import TenantSettings from './tenant-settings';
+import LoginPreviewMockup from './login-preview-mockup';
 import {
   User,
   LockKeyhole,
@@ -16,6 +17,9 @@ import {
   Plug,
   Archive,
   ArrowUpRight,
+  Monitor,
+  Smartphone,
+  ExternalLink,
 } from './icons';
 
 interface Props {
@@ -29,6 +33,7 @@ interface Props {
   ) => Promise<Session | null>;
   setNotice: (msg: string) => void;
   reload: () => Promise<void>;
+  view?: string;
 }
 
 export default function TenantSettingsPage({
@@ -38,11 +43,21 @@ export default function TenantSettingsPage({
   mutate,
   setNotice,
   reload,
+  view = 'all',
 }: Props) {
+  // Preview device state & active draft tracking
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [currentDraft, setCurrentDraft] = useState<Tenant>(tenant);
+
+  useEffect(() => {
+    setCurrentDraft(tenant);
+  }, [tenant]);
+
   // Credentials draft state
   const [adminName, setAdminName] = useState(tenant.admin || 'Administrador');
   const [adminEmail, setAdminEmail] = useState(tenant.email);
   const [newPassword, setNewPassword] = useState('');
+
   const [confirmPassword, setConfirmPassword] = useState('');
   const [credBusy, setCredBusy] = useState(false);
   const [credError, setCredError] = useState('');
@@ -98,8 +113,11 @@ export default function TenantSettingsPage({
   return (
     <div className="tenant-settings-page-container">
       <div className="settings-cards-grid">
-        {/* CARD 1: Perfil & Acesso da Operação */}
-        <section className="settings-card">
+        {/* CARDS 1 & 2: Perfil, Acesso & Plano (Ocultos na aba de Identidade Visual) */}
+        {view !== 'identity' && (
+          <>
+            {/* CARD 1: Perfil & Acesso da Operação */}
+            <section className="settings-card">
           <div className="settings-card-header">
             <div className="icon-wrap">
               <User size={22} />
@@ -187,7 +205,7 @@ export default function TenantSettingsPage({
                   />
                 </label>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
                   <label className="field">
                     <span>Nova Senha</span>
                     <input
@@ -365,26 +383,210 @@ export default function TenantSettingsPage({
             </div>
           </div>
         </section>
+          </>
+        )}
 
-        {/* CARD 3: Identidade Visual da Marca (Incorporada) */}
-        <section className="settings-card" style={{ gridColumn: '1 / -1' }}>
+        {/* CARD 3: Customização & Identidade Visual */}
+        <section className="settings-card">
           <div className="settings-card-header">
             <div className="icon-wrap">
               <Palette size={22} />
             </div>
             <div>
-              <h2>Identidade Visual da Marca</h2>
-              <p>Personalize logotipo, tipografia e cores aplicadas nos seus checkouts e páginas de pagamento</p>
+              <h2>Identidade Visual & Customização</h2>
+              <p>Personalize logo, cores principais, tipografia e modo visual da sua plataforma</p>
             </div>
           </div>
           <div className="settings-card-body">
             <TenantSettings
-              key={`${tenant.id}-settings-brand`}
               tenant={tenant}
               mode="identity"
               busy={busy}
-              onSave={(t) => mutate('tenant', t)}
+              onDraftChange={setCurrentDraft}
+              onSave={async (draft) => {
+                await mutate('tenant', draft);
+                setNotice('Identidade visual atualizada com sucesso!');
+                await reload();
+              }}
             />
+          </div>
+        </section>
+
+        {/* CARD 4: Prévia da Tela de Login */}
+        <section className="settings-card preview-card-section" style={{ gridColumn: '1 / -1' }}>
+          <div className="settings-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="icon-wrap">
+                <ShieldCheck size={22} />
+              </div>
+              <div>
+                <h2>Prévia da Tela de Login</h2>
+                <p>Visualização estática em tempo real do template de login selecionado com a identidade da marca</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'inline-flex', background: '#141713', padding: 3, borderRadius: 8, border: '1px solid #ffffff14' }}>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice('desktop')}
+                  className={previewDevice === 'desktop' ? 'primary' : 'secondary'}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: 12,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    height: 32,
+                  }}
+                  title="Visão Desktop"
+                >
+                  <Monitor size={15} /> Desktop
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice('mobile')}
+                  className={previewDevice === 'mobile' ? 'primary' : 'secondary'}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: 12,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    height: 32,
+                  }}
+                  title="Visão Mobile"
+                >
+                  <Smartphone size={15} /> Celular
+                </button>
+              </div>
+              <a
+                href="/login"
+                target="_blank"
+                rel="noreferrer"
+                className="primary"
+                style={{
+                  height: 32,
+                  padding: '0 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 12,
+                  textDecoration: 'none',
+                }}
+                title="Abrir tela de login real em nova aba"
+              >
+                Testar Login Real <ExternalLink size={14} />
+              </a>
+            </div>
+          </div>
+          <div
+            className="settings-card-body"
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              background: '#0a0c0a',
+              padding: previewDevice === 'mobile' ? '28px 16px' : '16px',
+              borderRadius: 8,
+              border: '1px solid #ffffff12',
+              overflow: 'hidden',
+              minHeight: 520,
+            }}
+          >
+            {previewDevice === 'desktop' ? (
+              <div
+                style={{
+                  width: '100%',
+                  height: 720,
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  border: '1px solid #ffffff18',
+                  background: '#090b09',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.7)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                {/* Mock browser topbar */}
+                <div
+                  style={{
+                    height: 32,
+                    background: '#141713',
+                    borderBottom: '1px solid #ffffff0d',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0 12px',
+                    gap: 6,
+                    flexShrink: 0,
+                  }}
+                >
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#ff5f56' }} />
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#ffbd2e' }} />
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#27c93f' }} />
+                  <div
+                    style={{
+                      margin: '0 auto',
+                      width: 240,
+                      height: 18,
+                      background: '#0c0f0a',
+                      borderRadius: 4,
+                      border: '1px solid #ffffff0a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 10,
+                      color: '#666',
+                    }}
+                  >
+                    https://{currentDraft.domain || `${currentDraft.slug}.tradingpro.io`}/login
+                  </div>
+                </div>
+                <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                  <LoginPreviewMockup draft={currentDraft} isMobile={false} />
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  width: 360,
+                  maxWidth: '100%',
+                  height: 660,
+                  boxSizing: 'border-box',
+                  borderRadius: 36,
+                  border: '8px solid #222720',
+                  boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px #ffffff1a',
+                  overflow: 'hidden',
+                  background: '#090b09',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                {/* Fake Phone Notch */}
+                <div
+                  style={{
+                    height: 22,
+                    background: '#191c16',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    zIndex: 10,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 80,
+                      height: 10,
+                      background: '#0d0f0c',
+                      borderRadius: 10,
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                  <LoginPreviewMockup draft={currentDraft} isMobile={true} />
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </div>

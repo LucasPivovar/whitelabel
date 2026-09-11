@@ -496,6 +496,7 @@ export default function Panel() {
               ? [
                   ['overview', 'Visão geral', Building2],
                   ['checkouts', 'Checkouts', PanelsTopLeft],
+                  ['identity', 'Identidade visual', Palette],
                   ['domains', 'Domínios', Globe],
                   ['connections', 'Conexões', Plug],
                   ['backups', 'Backups', Archive],
@@ -2170,6 +2171,7 @@ export default function Panel() {
               mutate={mutate}
               setNotice={setNotice}
               reload={load}
+              view="settings"
             />
           )}
           {view === 'backups' && tenant && (
@@ -2409,6 +2411,7 @@ export default function Panel() {
               mutate={mutate}
               setNotice={setNotice}
               reload={load}
+              view="identity"
             />
           )}
           {tenant && view === 'domains' && (

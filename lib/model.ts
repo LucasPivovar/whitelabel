@@ -12,6 +12,9 @@ export type TenantUser = {
   created: string;
 };
 
+export type LoginTemplate = 'split' | 'centered' | 'hero' | 'glassmorphism' | 'minimal';
+
+
 export type Tenant = {
   id: string;
   name: string;
@@ -23,6 +26,8 @@ export type Tenant = {
   font?: string;
   darkMode?: boolean;
   logo: string;
+  favicon?: string;
+  loginTemplate?: LoginTemplate;
   status: 'active' | 'suspended';
   domain: string;
   connections: string[];
@@ -30,6 +35,7 @@ export type Tenant = {
   created: string;
   users?: TenantUser[];
 };
+
 export type Review = { id: string; name: string; text: string; rating: number };
 export type Checkout = {
   paymentMethods?: ('pix' | 'boleto' | 'card')[];
@@ -332,6 +338,7 @@ export function validateTenant(t: Tenant) {
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email) ||
     !/^#[0-9a-f]{6}$/i.test(t.color) ||
     !validImage(t.logo) ||
+    (t.favicon && !validImage(t.favicon)) ||
     !['active', 'suspended'].includes(t.status) ||
     !Array.isArray(t.connections) ||
     t.connections.some((p) => !providers.includes(p))
