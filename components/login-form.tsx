@@ -31,9 +31,25 @@ function useLoginForm(invite?: string) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  function getTarget() {
+    if (typeof window === 'undefined') return '/dashboard';
+    const params = new URLSearchParams(window.location.search);
+    return params.get('redirect') || '/dashboard';
+  }
+
+  function setPrototypeAuth() {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('tradingpro_token', 'prototype-token');
+      } catch {}
+    }
+  }
+
   async function submit(demo: boolean) {
     setBusy(true);
     setError('');
+    const target = getTarget();
+    setPrototypeAuth();
     try {
       if (demo) {
         const response = await fetch('/api/demo/role', {
@@ -41,7 +57,7 @@ function useLoginForm(invite?: string) {
           body: JSON.stringify({ role: 'tenant' }),
         });
         if (!response.ok) throw Error('Não foi possível abrir a demonstração.');
-        window.location.assign('/');
+        window.location.assign(target);
         return;
       }
       const r = await fetch(
@@ -56,7 +72,7 @@ function useLoginForm(invite?: string) {
       );
       const data = await r.json() as { error?: string };
       if (!r.ok) throw Error(data.error);
-      router.replace('/');
+      router.replace(target);
       router.refresh();
     } catch (err) {
       setError((err as Error).message);
@@ -68,6 +84,8 @@ function useLoginForm(invite?: string) {
   async function quickLogin() {
     setBusy(true);
     setError('');
+    const target = getTarget();
+    setPrototypeAuth();
     try {
       const r = await fetch('/api/auth/quick-login', {
         method: 'POST',
@@ -75,7 +93,7 @@ function useLoginForm(invite?: string) {
       });
       const data = await r.json() as { error?: string };
       if (!r.ok) throw Error(data.error || 'Não foi possível entrar.');
-      window.location.assign('/');
+      window.location.assign(target);
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);
@@ -157,7 +175,7 @@ function LoginFields({
           <button
             type="button"
             className="autofill-link"
-            onClick={() => { setEmail('admin@tradingpro.io'); setPassword('BY7Nt7AxjCeJTo4iBUqS'); }}
+            onClick={() => { setEmail('admin@whitelabel.local'); setPassword('BY7Nt7AxjCeJTo4iBUqS'); }}
           >
             Preencher credenciais de teste
           </button>
@@ -344,38 +362,71 @@ function TemplateMinimal({ invite, demo, branding }: { invite?: string; demo: bo
 }
 
 // ── Entry point ────────────────────────────────────────────────────────────
-export default function LoginForm({ invite, demo = false }: { invite?: string; demo?: boolean }) {
+export default function LoginForm({
+  invite,
+  demo = false,
+  initialTemplate,
+}: {
+  invite?: string;
+  demo?: boolean;
+  initialTemplate?: LoginTemplate;
+}) {
   const [branding, setBranding] = useState<Branding>({
-    name: 'TradingPro',
+    name: 'Plataforma',
     color: '#96d600',
     logo: '',
-    loginTemplate: 'split',
+    loginTemplate: initialTemplate || 'split',
   });
 
   useEffect(() => {
     const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-    const qTemplate = params?.get('template') as LoginTemplate | null;
+    const qTemplate = (params?.get('template') || params?.get('loginTemplate')) as LoginTemplate | null;
+    const qName = params?.get('name');
+    const qColor = params?.get('color');
+    const qLogo = params?.get('logo');
+
+    let stored: Partial<Branding> = {};
+    if (typeof window !== 'undefined') {
+      try {
+        stored = JSON.parse(localStorage.getItem('whitelabel_tenant_branding') || '{}');
+      } catch {}
+    }
+
+    const applyBranding = (b: Branding) => {
+      setBranding(b);
+      if (typeof document !== 'undefined' && b.color) {
+        document.documentElement.style.setProperty('--lime', b.color);
+        document.documentElement.style.setProperty('--brand-primary', b.color);
+      }
+    };
 
     fetch('/api/branding')
       .then((r) => r.json())
       .then((d: Record<string, unknown>) => {
-        if (d?.name || d?.color) {
-          setBranding({
-            name: String(d.name || 'TradingPro'),
-            color: String(d.color || '#96d600'),
-            logo: String(d.logo || ''),
-            loginTemplate: qTemplate || (d.loginTemplate as LoginTemplate) || 'split',
-          });
-        } else if (qTemplate) {
-          setBranding((prev) => ({ ...prev, loginTemplate: qTemplate }));
-        }
+        const resolvedTemplate = qTemplate || initialTemplate || (d?.loginTemplate as LoginTemplate) || (stored.loginTemplate as LoginTemplate) || 'split';
+        const resolvedName = qName || (d?.name as string) || (stored.name as string) || 'Plataforma';
+        const resolvedColor = qColor || (d?.color as string) || (stored.color as string) || '#96d600';
+        const resolvedLogo = qLogo || (d?.logo as string) || (stored.logo as string) || '';
+        applyBranding({
+          name: resolvedName,
+          color: resolvedColor,
+          logo: resolvedLogo,
+          loginTemplate: resolvedTemplate,
+        });
       })
       .catch(() => {
-        if (qTemplate) {
-          setBranding((prev) => ({ ...prev, loginTemplate: qTemplate }));
-        }
+        const resolvedTemplate = qTemplate || initialTemplate || (stored.loginTemplate as LoginTemplate) || 'split';
+        const resolvedName = qName || (stored.name as string) || 'Plataforma';
+        const resolvedColor = qColor || (stored.color as string) || '#96d600';
+        const resolvedLogo = qLogo || (stored.logo as string) || '';
+        applyBranding({
+          name: resolvedName,
+          color: resolvedColor,
+          logo: resolvedLogo,
+          loginTemplate: resolvedTemplate,
+        });
       });
-  }, []);
+  }, [initialTemplate]);
 
   if (branding.loginTemplate === 'centered') {
     return <TemplateCentered invite={invite} demo={demo} branding={branding} />;

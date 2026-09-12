@@ -537,7 +537,7 @@ export default function TenantSettingsPage({
                       color: '#666',
                     }}
                   >
-                    https://{currentDraft.domain || `${currentDraft.slug}.tradingpro.io`}/login
+                    {currentDraft.domain ? `https://${currentDraft.domain}/login` : 'URL não definida'}
                   </div>
                 </div>
                 <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>

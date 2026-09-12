@@ -257,12 +257,26 @@ const date = (s: string) =>
     minute: '2-digit',
   }).format(new Date(s));
 
-export default function Panel() {
+export default function Panel({ initialView = 'overview' }: { initialView?: string } = {}) {
   const [session, setSession] = useState<Session | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
-  const [view, setView] = useState('overview');
+  const [view, setView] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.replace(/^\//, '').split('/')[0];
+      if (path === 'dashboard') return 'overview';
+      if (path === 'connections') return 'connections';
+      if (path === 'checkouts') return 'checkouts';
+      if (path === 'domains') return 'domains';
+      if (path === 'identity') return 'identity';
+      if (path === 'settings') return 'settings';
+      if (path === 'backups') return 'backups';
+      if (path === 'tenants') return 'tenants';
+      if (path === 'activities') return 'activity';
+    }
+    return initialView;
+  });
   const [tenantId, setTenantId] = useState('');
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
@@ -327,9 +341,6 @@ export default function Panel() {
       setSession(data);
       if (data.role === 'tenant') {
         setTenantId(data.tenantId || '');
-        setView('overview');
-      } else if (data.role === 'admin' && !tenantId) {
-        setView('overview');
       }
     } catch (e) {
       setError(String((e as Error).message));
@@ -390,6 +401,23 @@ export default function Panel() {
     setQuery('');
     setFilter('all');
     setManageTenantId(null);
+    if (typeof window !== 'undefined') {
+      const urlMap: Record<string, string> = {
+        overview: '/dashboard',
+        connections: '/connections',
+        checkouts: '/checkouts',
+        domains: '/domains',
+        identity: '/identity',
+        settings: '/settings',
+        backups: '/backups',
+        tenants: '/tenants',
+        activity: '/activities',
+      };
+      const path = urlMap[next] || '/dashboard';
+      if (window.location.pathname !== path) {
+        window.history.pushState(null, '', path);
+      }
+    }
   }
   const tenants = session?.state.tenants || [];
   const tenant = tenants.find((t) => t.id === tenantId);
@@ -765,14 +793,14 @@ export default function Panel() {
                     </p>
                     <div className="tenant-hub-links">
                       <a
-                        href={`https://${managedTenant.domain || (managedTenant.slug === 'tradingpro' ? 'tradingpro.io' : `${managedTenant.slug}.tradingpro.io`)}`}
-                        target="_blank"
+                        href={managedTenant.domain ? `https://${managedTenant.domain}` : '#'}
+                        target={managedTenant.domain ? '_blank' : undefined}
                         rel="noreferrer"
                         className="tenant-domain-pill"
                       >
                         <Globe size={14} />
-                        {managedTenant.domain || (managedTenant.slug === 'tradingpro' ? 'tradingpro.io' : `${managedTenant.slug}.tradingpro.io`)}
-                        <ExternalLink size={12} />
+                        {managedTenant.domain || 'URL não definida'}
+                        {managedTenant.domain && <ExternalLink size={12} />}
                       </a>
                       <button
                         className={managedTenant.status === 'active' ? 'danger text-btn' : 'primary text-btn'}
@@ -809,8 +837,8 @@ export default function Panel() {
                   </div>
                   <div className="hub-stat-item">
                     <span>DOMÍNIO DNS</span>
-                    <strong style={{ fontSize: 13 }}>{managedTenant.domain ? 'Personalizado' : 'tradingpro.io'}</strong>
-                    <small>{managedTenant.domain ? 'Apontamento CNAME' : 'Subdomínio ativo'}</small>
+                    <strong style={{ fontSize: 13 }}>{managedTenant.domain ? 'Personalizado' : 'URL não definida'}</strong>
+                    <small>{managedTenant.domain ? 'Apontamento CNAME' : 'Domínio não configurado'}</small>
                   </div>
                 </div>
               </div>
@@ -1104,8 +1132,8 @@ export default function Panel() {
                             <strong>{managedTenant.font || 'Inter'}</strong>
                           </div>
                           <div className="info-row">
-                            <span>Subdomínio da Plataforma:</span>
-                            <code>{managedTenant.slug}.tradingpro.io</code>
+                            <span>Domínio da Plataforma:</span>
+                            <code>{managedTenant.domain || 'URL não definida'}</code>
                           </div>
                         </div>
                         <div className="brand-swatches">
@@ -1138,7 +1166,7 @@ export default function Panel() {
                             )}
                             <div>
                               <strong style={{ fontSize: 16, color: '#fff' }}>{managedTenant.name}</strong>
-                              <small style={{ display: 'block', color: '#8d9c82', fontSize: 11 }}>{managedTenant.slug}.tradingpro.io</small>
+                              <small style={{ display: 'block', color: '#8d9c82', fontSize: 11 }}>{managedTenant.domain || 'URL não definida'}</small>
                             </div>
                           </div>
                           <span style={{ fontSize: 11, background: managedTenant.color, color: '#111810', padding: '4px 10px', borderRadius: 4, fontWeight: 600 }}>
@@ -1292,7 +1320,7 @@ export default function Panel() {
                             <Avatar tenant={t} />
                             <div>
                               <strong>{t.name}</strong>
-                              <small>{t.domain || (t.slug === 'tradingpro' ? 'tradingpro.io' : `${t.slug}.tradingpro.io`)}</small>
+                              <small>{t.domain || 'URL não definida'}</small>
                             </div>
                           </div>
                         </TableCell>
@@ -1466,7 +1494,7 @@ export default function Panel() {
                               <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <strong style={{ fontSize: 13 }}>{t.name}</strong>
                                 <small style={{ color: '#88987b', fontSize: 11 }}>
-                                  {t.domain || (t.slug === 'tradingpro' ? 'tradingpro.io' : `${t.slug}.tradingpro.io`)}
+                                  {t.domain || 'URL não definida'}
                                 </small>
                               </div>
                             </div>
@@ -1645,7 +1673,7 @@ export default function Panel() {
                             <Avatar tenant={t} />
                             <div>
                               <strong>{t.name}</strong>
-                              <small>{t.slug}.tradingpro.io</small>
+                              <small>{t.domain || 'URL não definida'}</small>
                             </div>
                           </div>
                         </TableCell>
@@ -1755,7 +1783,7 @@ export default function Panel() {
                   <Avatar tenant={tenant} />
                   <div>
                     <h2>{tenant.name}</h2>
-                    <p>{tenant.domain || `${tenant.slug}.tradingpro.io`}</p>
+                    <p>{tenant.domain || 'URL não definida'}</p>
                     <small>
                       {tenant.status === 'active' ? 'Operação ativa' : 'Operação suspensa'} · DNS não verificado
                     </small>
@@ -1904,7 +1932,7 @@ export default function Panel() {
                               <Avatar tenant={t} />
                               <div>
                                 <strong>{t.name}</strong>
-                                <small>{t.slug}.tradingpro.io</small>
+                                <small>{t.domain || 'URL não definida'}</small>
                               </div>
                             </div>
                           </TableCell>
@@ -1923,7 +1951,7 @@ export default function Panel() {
                             {t.domain ? (
                               <strong style={{ fontSize: 13, color: '#e5ede0' }}>{t.domain}</strong>
                             ) : (
-                              <span style={{ fontSize: 12, color: '#88987b' }}>{t.slug}.tradingpro.io</span>
+                              <span style={{ fontSize: 12, color: '#88987b' }}>URL não definida</span>
                             )}
                           </TableCell>
                           <TableCell>

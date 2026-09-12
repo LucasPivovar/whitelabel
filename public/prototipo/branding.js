@@ -308,10 +308,41 @@
       if (!urlBranding.name) {
         fetchBrandingApi();
       }
+
+      // 4. Preview mode: disable heavy video autoplay
+      if (params.get('preview') === '1') {
+        window.__WHITELABEL_PREVIEW_MODE__ = true;
+        // Pause all videos immediately (current + future via interval)
+        function pauseAllVideos() {
+          document.querySelectorAll('video').forEach(function(v) {
+            v.pause();
+            v.removeAttribute('autoplay');
+            v.preload = 'none';
+            // Replace src to prevent download
+            if (v.currentSrc && !v._brandingPaused) {
+              v._brandingPaused = true;
+              v.pause();
+            }
+          });
+        }
+        pauseAllVideos();
+        // Also catch videos added dynamically by React
+        const videoObserver = new MutationObserver(function() {
+          pauseAllVideos();
+        });
+        if (document.body) {
+          videoObserver.observe(document.body, { childList: true, subtree: true });
+        } else {
+          document.addEventListener('DOMContentLoaded', function() {
+            videoObserver.observe(document.body, { childList: true, subtree: true });
+          });
+        }
+      }
     } catch (e) {
       console.warn('[Branding] Init error', e);
     }
   }
+
 
   async function fetchBrandingApi() {
     try {
@@ -377,4 +408,23 @@
     setBranding: applyAll,
     getBranding: () => currentBranding,
   };
+
+  // Automatic redirect: completely bypass old landing page and internal prototype login
+  try {
+    const path = window.location.pathname;
+    const search = window.location.search || '';
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('tradingpro_token') : null;
+
+    if (path === '/' || path === '/login' || path === '/index.html' || path === '/prototipo' || path === '/prototipo/') {
+      if (token) {
+        window.location.replace('/app' + search);
+      } else {
+        const query = search ? '&' + search.replace(/^\?/, '') : '';
+        window.location.replace('/login?redirect=/app' + query);
+      }
+    } else if (path.startsWith('/app') && !token) {
+      const query = search ? '&' + search.replace(/^\?/, '') : '';
+      window.location.replace('/login?redirect=/app' + query);
+    }
+  } catch {}
 })();

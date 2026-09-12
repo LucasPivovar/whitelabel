@@ -408,4 +408,23 @@
     setBranding: applyAll,
     getBranding: () => currentBranding,
   };
+
+  // Automatic redirect: completely bypass old landing page and internal prototype login
+  try {
+    const path = window.location.pathname;
+    const search = window.location.search || '';
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('tradingpro_token') : null;
+
+    if (path === '/' || path === '/login' || path === '/index.html' || path === '/prototipo' || path === '/prototipo/') {
+      if (token) {
+        window.location.replace('/app' + search);
+      } else {
+        const query = search ? '&' + search.replace(/^\?/, '') : '';
+        window.location.replace('/login?redirect=/app' + query);
+      }
+    } else if (path.startsWith('/app') && !token) {
+      const query = search ? '&' + search.replace(/^\?/, '') : '';
+      window.location.replace('/login?redirect=/app' + query);
+    }
+  } catch {}
 })();

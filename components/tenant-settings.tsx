@@ -6,8 +6,7 @@ import { ExternalLink, Save, X } from './icons';
 
 
 export function PlatformLink({ tenant }: { tenant: Tenant }) {
-  const host = tenant.domain || (tenant.slug === 'tradingpro' ? 'tradingpro.io' : `${tenant.slug}.tradingpro.io`);
-  const prototypeQuery = `?name=${encodeURIComponent(tenant.name)}&color=${encodeURIComponent(tenant.color)}&logo=${encodeURIComponent(tenant.logo || '')}&favicon=${encodeURIComponent(tenant.favicon || '')}&secondaryColor=${encodeURIComponent(tenant.secondaryColor || '')}&font=${encodeURIComponent(tenant.font || '')}`;
+  const prototypeQuery = `?name=${encodeURIComponent(tenant.name)}&color=${encodeURIComponent(tenant.color)}&logo=${encodeURIComponent(tenant.logo || '')}&favicon=${encodeURIComponent(tenant.favicon || '')}&secondaryColor=${encodeURIComponent(tenant.secondaryColor || '')}&font=${encodeURIComponent(tenant.font || '')}&loginTemplate=${encodeURIComponent(tenant.loginTemplate || 'split')}`;
   return (
     <a
       className="secondary"
@@ -16,7 +15,7 @@ export function PlatformLink({ tenant }: { tenant: Tenant }) {
       rel="noreferrer"
       style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
     >
-      Acessar plataforma ({host}) <ExternalLink size={16} />
+      Acessar protótipo <ExternalLink size={16} />
     </a>
   );
 }
@@ -402,7 +401,7 @@ export default function TenantSettings({ tenant, mode, busy, onSave, onDraftChan
         />
       </> : <>
 
-        <label className="field"><span>Subdomínio da plataforma</span><input readOnly value={tenant.slug === 'tradingpro' ? 'tradingpro.io' : `${tenant.slug}.tradingpro.io`} /></label>
+        <label className="field"><span>Subdomínio da plataforma</span><input readOnly value={tenant.domain || 'URL não definida'} /></label>
         <label className="field"><span>Domínio personalizado</span><input placeholder="app.suaempresa.com" value={draft.domain} onChange={e => setDraft({ ...draft, domain: e.target.value.trim() })} /></label>
         <p className="settings-status">{tenant.domain ? 'Domínio salvo · conexão DNS não verificada' : 'Domínio personalizado não configurado'}</p>
         <PlatformLink tenant={tenant} />
@@ -428,7 +427,7 @@ export default function TenantSettings({ tenant, mode, busy, onSave, onDraftChan
         )}
       </div>
       <h2 style={{ fontFamily: `${draft.font || 'Inter'}, sans-serif` }}>{draft.name}</h2>
-      <p>{tenant.domain || (tenant.slug === 'tradingpro' ? 'tradingpro.io' : `${tenant.slug}.tradingpro.io`)}</p>
+      <p>{tenant.domain || 'URL não definida'}</p>
       <div style={{ display: 'flex', gap: '8px', marginTop: '12px', alignItems: 'center' }}>
         <span className="brand-swatch" style={{ background: draft.color }} title="Cor principal" />
         {draft.secondaryColor && <span className="brand-swatch" style={{ background: draft.secondaryColor }} title="Cor secundária" />}

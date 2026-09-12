@@ -142,7 +142,7 @@ export type PlatformSettings = {
 
 export const defaultPlatformSettings: PlatformSettings = {
   allowedBots: ['mt5-ea', 'tradingview-webhooks', 'copy-trading-engine', 'grid-dca-bot'],
-  masterDomain: 'tradingpro.io',
+  masterDomain: '',
   maintenanceMode: false,
   maxUploadBytes: 409600,
   rateLimitPerMinute: 120,
@@ -260,7 +260,7 @@ export function mockActivities(): { id: string; text: string; time: string }[] {
   const now = Date.now();
   return [
     { id: crypto.randomUUID(), text: 'Checkout "Robô Scalper MT5 - Licença Anual" publicado online com sucesso', time: new Date(now - 1000 * 60 * 15).toISOString() },
-    { id: crypto.randomUUID(), text: 'Apontamento CNAME verificado com sucesso para cname.tradingpro.io', time: new Date(now - 1000 * 60 * 65).toISOString() },
+    { id: crypto.randomUUID(), text: 'Apontamento CNAME verificado com sucesso para cname.whitelabel.local', time: new Date(now - 1000 * 60 * 65).toISOString() },
     { id: crypto.randomUUID(), text: 'Snapshot automático diário gerado e verificado (SHA-256 válido)', time: new Date(now - 1000 * 60 * 180).toISOString() },
     { id: crypto.randomUUID(), text: 'Conexão com corretora Bybit liberada para a operação', time: new Date(now - 1000 * 60 * 360).toISOString() },
     { id: crypto.randomUUID(), text: 'Checkout "Mentoria VIP + Sala ao Vivo" configurado e publicado', time: new Date(now - 1000 * 60 * 720).toISOString() },
