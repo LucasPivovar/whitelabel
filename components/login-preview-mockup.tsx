@@ -7,7 +7,6 @@ import {
   Check,
   Activity,
   ArrowUpRight,
-  LockKeyhole,
 } from './icons';
 
 interface Props {
@@ -125,20 +124,7 @@ export default function LoginPreviewMockup({ draft, isMobile = false }: Props) {
         <ArrowUpRight size={isCompact ? 14 : 17} />
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 6,
-          color: '#667',
-          fontSize: isCompact ? 10 : 12,
-          marginTop: 2,
-        }}
-      >
-        <LockKeyhole size={isCompact ? 11 : 13} />
-        <span>Acesso restrito aos administradores</span>
-      </div>
+
     </div>
   );
 

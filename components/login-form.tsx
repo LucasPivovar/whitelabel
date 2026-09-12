@@ -9,7 +9,6 @@ import {
   Eye,
   EyeOff,
   Zap,
-  LockKeyhole,
   Activity,
   Check,
 } from '@/components/icons';
@@ -181,11 +180,7 @@ function LoginFields({
           </button>
         </div>
       )}
-      <p className="login-footnote">
-        <LockKeyhole size={13} />
-        Acesso restrito aos administradores da plataforma.
-      </p>
-      {demo && <p className="login-footnote">Demonstração com dados fictícios. As alterações podem ser apagadas.</p>}
+
     </form>
   );
 }
