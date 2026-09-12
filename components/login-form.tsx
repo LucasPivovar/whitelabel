@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import '@/app/login.css';
 import { useRouter } from 'next/navigation';
@@ -33,22 +33,14 @@ function useLoginForm(invite?: string) {
   function getTarget() {
     if (typeof window === 'undefined') return '/dashboard';
     const params = new URLSearchParams(window.location.search);
-    return params.get('redirect') || '/dashboard';
-  }
-
-  function setPrototypeAuth() {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('tradingpro_token', 'prototype-token');
-      } catch {}
-    }
+    const target = params.get('redirect');
+    return target && target.startsWith('/') && !target.startsWith('//') && !target.startsWith('/prototipo') ? target : '/dashboard';
   }
 
   async function submit(demo: boolean) {
     setBusy(true);
     setError('');
     const target = getTarget();
-    setPrototypeAuth();
     try {
       if (demo) {
         const response = await fetch('/api/demo/role', {
@@ -84,7 +76,6 @@ function useLoginForm(invite?: string) {
     setBusy(true);
     setError('');
     const target = getTarget();
-    setPrototypeAuth();
     try {
       const r = await fetch('/api/auth/quick-login', {
         method: 'POST',
@@ -222,219 +213,9 @@ function TemplateSplit({ invite, demo, branding }: { invite?: string; demo: bool
   );
 }
 
-// ── Template B: Centered ───────────────────────────────────────────────────
-function TemplateCentered({ invite, demo, branding }: { invite?: string; demo: boolean; branding: Branding }) {
-  const form = useLoginForm(invite);
-  return (
-    <main
-      className="login-page login-centered"
-      style={{ '--brand-color': branding.color, '--brand-color-alpha': branding.color + '1e', '--brand-shadow': branding.color + '59' } as React.CSSProperties}
-    >
-      <div className="login-card">
-        <div className="brand-center">
-          <div className="brand-logo-wrap">
-            {branding.logo
-              ? <img src={branding.logo} alt={branding.name} />
-              : <Zap size={32} fill="currentColor" />}
-          </div>
-          <h2>{branding.name}</h2>
-          <p>Console · White Label</p>
-        </div>
-        <LoginFields invite={invite} demo={demo} branding={branding} form={form} />
-      </div>
-    </main>
-  );
-}
 
-// ── Template C: Hero ───────────────────────────────────────────────────────
-function TemplateHero({ invite, demo, branding }: { invite?: string; demo: boolean; branding: Branding }) {
-  const form = useLoginForm(invite);
-  return (
-    <main
-      className="login-page login-hero"
-      style={{
-        '--brand-color': branding.color,
-        '--brand-color-alpha': branding.color + '26',
-        '--brand-shadow': branding.color + '55',
-      } as React.CSSProperties}
-    >
-      <div className="login-hero-bg">
-        <div className="hero-ambient-orb" />
-        <div className="hero-circle-accent" />
-        <div className="hero-copy">
-          <Link href="/login" className="hero-brand">
-            <span className="brand-icon">
-              {branding.logo ? (
-                <img src={branding.logo} alt={branding.name} />
-              ) : (
-                <Zap size={26} fill="currentColor" />
-              )}
-            </span>
-            <span className="hero-brand-name">{branding.name}</span>
-          </Link>
-          <h2>
-            Gerencie sua<br />operação com<br /><span>total controle.</span>
-          </h2>
-          <p>Tenants, checkouts de alta conversão, domínios próprios e conexões de corretoras em um só lugar.</p>
-          <div className="hero-feature-pills">
-            <span className="hero-pill"><Check size={13} /> Multi-tenant Isolado</span>
-            <span className="hero-pill"><Check size={13} /> Alta Conversão</span>
-            <span className="hero-pill"><Check size={13} /> Domínio Próprio</span>
-          </div>
-        </div>
-      </div>
-      <div className="login-hero-panel">
-        <LoginFields invite={invite} demo={demo} branding={branding} form={form} />
-      </div>
-    </main>
-  );
-}
-
-// ── Template D: Glassmorphism ──────────────────────────────────────────────
-function TemplateGlassmorphism({ invite, demo, branding }: { invite?: string; demo: boolean; branding: Branding }) {
-  const form = useLoginForm(invite);
-  return (
-    <main
-      className="login-page login-glassmorphism"
-      style={{
-        '--brand-color': branding.color,
-        '--brand-color-alpha': branding.color + '26',
-        '--brand-shadow': branding.color + '50',
-      } as React.CSSProperties}
-    >
-      <div className="glass-orb-1" />
-      <div className="glass-orb-2" />
-      <div className="glass-orb-3" />
-      <div className="glass-container">
-        <div className="glass-card">
-          <div className="glass-brand-header">
-            <div className="glass-brand-icon">
-              {branding.logo ? (
-                <img src={branding.logo} alt={branding.name} />
-              ) : (
-                <Zap size={24} fill="currentColor" />
-              )}
-            </div>
-            <h2>{branding.name}</h2>
-            <span>Plataforma White Label</span>
-          </div>
-          <LoginFields invite={invite} demo={demo} branding={branding} form={form} />
-        </div>
-      </div>
-    </main>
-  );
-}
-
-// ── Template E: Minimal ────────────────────────────────────────────────────
-function TemplateMinimal({ invite, demo, branding }: { invite?: string; demo: boolean; branding: Branding }) {
-  const form = useLoginForm(invite);
-  return (
-    <main
-      className="login-page login-minimal"
-      style={{
-        '--brand-color': branding.color,
-        '--brand-shadow': branding.color + '40',
-      } as React.CSSProperties}
-    >
-      <div className="minimal-container">
-        <div className="minimal-header">
-          <div className="minimal-brand-mark">
-            {branding.logo ? (
-              <img src={branding.logo} alt={branding.name} />
-            ) : (
-              <Zap size={20} fill="currentColor" />
-            )}
-          </div>
-          <h2>{branding.name}</h2>
-          <p>Acesse o console de gerenciamento</p>
-        </div>
-        <div className="minimal-card">
-          <LoginFields invite={invite} demo={demo} branding={branding} form={form} />
-        </div>
-      </div>
-    </main>
-  );
-}
-
-// ── Entry point ────────────────────────────────────────────────────────────
-export default function LoginForm({
-  invite,
-  demo = false,
-  initialTemplate,
-}: {
-  invite?: string;
-  demo?: boolean;
-  initialTemplate?: LoginTemplate;
-}) {
-  const [branding, setBranding] = useState<Branding>({
-    name: 'Plataforma',
-    color: '#96d600',
-    logo: '',
-    loginTemplate: initialTemplate || 'split',
-  });
-
-  useEffect(() => {
-    const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-    const qTemplate = (params?.get('template') || params?.get('loginTemplate')) as LoginTemplate | null;
-    const qName = params?.get('name');
-    const qColor = params?.get('color');
-    const qLogo = params?.get('logo');
-
-    let stored: Partial<Branding> = {};
-    if (typeof window !== 'undefined') {
-      try {
-        stored = JSON.parse(localStorage.getItem('whitelabel_tenant_branding') || '{}');
-      } catch {}
-    }
-
-    const applyBranding = (b: Branding) => {
-      setBranding(b);
-      if (typeof document !== 'undefined' && b.color) {
-        document.documentElement.style.setProperty('--lime', b.color);
-        document.documentElement.style.setProperty('--brand-primary', b.color);
-      }
-    };
-
-    fetch('/api/branding')
-      .then((r) => r.json())
-      .then((d: Record<string, unknown>) => {
-        const resolvedTemplate = qTemplate || initialTemplate || (d?.loginTemplate as LoginTemplate) || (stored.loginTemplate as LoginTemplate) || 'split';
-        const resolvedName = qName || (d?.name as string) || (stored.name as string) || 'Plataforma';
-        const resolvedColor = qColor || (d?.color as string) || (stored.color as string) || '#96d600';
-        const resolvedLogo = qLogo || (d?.logo as string) || (stored.logo as string) || '';
-        applyBranding({
-          name: resolvedName,
-          color: resolvedColor,
-          logo: resolvedLogo,
-          loginTemplate: resolvedTemplate,
-        });
-      })
-      .catch(() => {
-        const resolvedTemplate = qTemplate || initialTemplate || (stored.loginTemplate as LoginTemplate) || 'split';
-        const resolvedName = qName || (stored.name as string) || 'Plataforma';
-        const resolvedColor = qColor || (stored.color as string) || '#96d600';
-        const resolvedLogo = qLogo || (stored.logo as string) || '';
-        applyBranding({
-          name: resolvedName,
-          color: resolvedColor,
-          logo: resolvedLogo,
-          loginTemplate: resolvedTemplate,
-        });
-      });
-  }, [initialTemplate]);
-
-  if (branding.loginTemplate === 'centered') {
-    return <TemplateCentered invite={invite} demo={demo} branding={branding} />;
-  }
-  if (branding.loginTemplate === 'hero') {
-    return <TemplateHero invite={invite} demo={demo} branding={branding} />;
-  }
-  if (branding.loginTemplate === 'glassmorphism') {
-    return <TemplateGlassmorphism invite={invite} demo={demo} branding={branding} />;
-  }
-  if (branding.loginTemplate === 'minimal') {
-    return <TemplateMinimal invite={invite} demo={demo} branding={branding} />;
-  }
+// Administrative authentication is independent of the prototype's branding.
+export default function LoginForm({ invite, demo = false }: { invite?: string; demo?: boolean }) {
+  const branding: Branding = { name: 'White Label', color: '#96d600', logo: '', loginTemplate: 'split' };
   return <TemplateSplit invite={invite} demo={demo} branding={branding} />;
 }
-

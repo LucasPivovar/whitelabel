@@ -98,6 +98,9 @@ import RoleToolbar from '@/components/role-toolbar';
 import AccountInvite from '@/components/account-invite';
 import TenantSettings, { PlatformLink } from '@/components/tenant-settings';
 import TenantSettingsPage from '@/components/tenant-settings-page';
+import { applyBrandTheme } from '@/lib/brand-theme';
+import { noticeTone } from '@/lib/notices';
+import { CircleCheck, TriangleAlert, Info, CircleX } from 'lucide-react';
 
 export function Field({
   label,
@@ -278,6 +281,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
     return initialView;
   });
   const [tenantId, setTenantId] = useState('');
+  const [brandDraft, setBrandDraft] = useState<Tenant | null>(null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [editTenant, setEditTenant] = useState<Tenant | null>(null);
@@ -421,6 +425,30 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
   }
   const tenants = session?.state.tenants || [];
   const tenant = tenants.find((t) => t.id === tenantId);
+  const visualTenant = brandDraft?.id === tenant?.id ? brandDraft : tenant;
+  useEffect(() => {
+    document.title = `${visualTenant?.name || 'TradingPro'} | White Label`;
+    const icon = visualTenant?.favicon || visualTenant?.logo;
+    let link = document.getElementById('tenant-favicon') as HTMLLinkElement | null;
+    if (!icon) { link?.remove(); return; }
+    if (!link) { link = document.createElement('link'); link.id = 'tenant-favicon'; link.rel = 'icon'; document.head.appendChild(link); }
+    link.href = icon;
+  }, [visualTenant?.name, visualTenant?.favicon, visualTenant?.logo]);
+  useEffect(() => {
+    setBrandDraft(null);
+    applyBrandTheme(tenant);
+    const update = (event: Event) => {
+      const draft = (event as CustomEvent<Tenant>).detail;
+      if (draft?.id !== tenant?.id) return;
+      applyBrandTheme(draft);
+      setBrandDraft(draft);
+    };
+    window.addEventListener('whitelabel:identity-draft', update);
+    return () => {
+      window.removeEventListener('whitelabel:identity-draft', update);
+      applyBrandTheme();
+    };
+  }, [tenant]);
   const managedTenant = tenants.find((t) => t.id === manageTenantId);
   const admin = session?.role === 'admin' && !tenantId;
   const checkouts = (session?.state.checkouts || []).filter(
@@ -508,12 +536,12 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
       <Sidebar>
         <SidebarHeader>
           <Link href="/" className="brand">
-            <Zap fill="currentColor" size={23} />
-            TradingPro<span>console</span>
+            {visualTenant?.logo ? <img src={visualTenant.logo} alt="" style={{ width: 28, height: 28, objectFit: 'contain' }} /> : <Zap fill="currentColor" size={23} />}
+            {visualTenant?.name || 'TradingPro'}<span>console</span>
           </Link>
           <div className="workspace-label">
             <ShieldCheck size={16} />
-            {tenant ? tenant.name : 'Super admin'}
+            {visualTenant ? visualTenant.name : 'Super admin'}
             <span className="live-dot" />
           </div>
         </SidebarHeader>
@@ -571,7 +599,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
               <Layers size={18} />
             </span>
             <div>
-              TradingPro White Label<small>Central de gerenciamento</small>
+              {visualTenant?.name || 'TradingPro'} White Label<small>Central de gerenciamento</small>
             </div>
           </div>
           <div className="profile">
@@ -589,14 +617,14 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
         <header className="topbar">
           <div className="breadcrumb">
             <SidebarTrigger />
-            <span>{tenant ? tenant.name : 'Super Admin'}</span>
+            <span>{visualTenant ? visualTenant.name : 'Super Admin'}</span>
             <ChevronRight size={14} />
             {managedTenant && view === 'tenants' ? (
               <>
                 <button
                   type="button"
                   onClick={() => setManageTenantId(null)}
-                  style={{ background: 'none', border: 'none', color: '#96d600', font: 'inherit', cursor: 'pointer', padding: 0 }}
+                  style={{ background: 'none', border: 'none', color: "var(--brand-accent)", font: 'inherit', cursor: 'pointer', padding: 0 }}
                 >
                   {titles[view]}
                 </button>
@@ -989,9 +1017,9 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                   </div>
 
                   {inviteTenantId === managedTenant.id && (
-                    <div className="invite-box-wrap" style={{ marginTop: 20, background: '#1b1e19', border: '1px solid #ffffff15', borderRadius: 8, padding: 20 }}>
+                    <div className="invite-box-wrap" style={{ marginTop: 20, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, padding: 20 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <strong style={{ fontSize: 13, color: '#e5ede0' }}>Link de Ativação / Convite para {managedTenant.name}</strong>
+                        <strong style={{ fontSize: 13, color: "var(--foreground)" }}>Link de Ativação / Convite para {managedTenant.name}</strong>
                         <IconButton label="Fechar" onClick={() => setInviteTenantId(null)}>
                           <X size={16} />
                         </IconButton>
@@ -1166,14 +1194,14 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                             )}
                             <div>
                               <strong style={{ fontSize: 16, color: '#fff' }}>{managedTenant.name}</strong>
-                              <small style={{ display: 'block', color: '#8d9c82', fontSize: 11 }}>{managedTenant.domain || 'URL não definida'}</small>
+                              <small style={{ display: 'block', color: "var(--muted-foreground)", fontSize: 11 }}>{managedTenant.domain || 'URL não definida'}</small>
                             </div>
                           </div>
-                          <span style={{ fontSize: 11, background: managedTenant.color, color: '#111810', padding: '4px 10px', borderRadius: 4, fontWeight: 600 }}>
+                          <span style={{ fontSize: 11, background: managedTenant.color, color: "var(--muted-foreground)", padding: '4px 10px', borderRadius: 4, fontWeight: 600 }}>
                             Acesso Parceiro
                           </span>
                         </div>
-                        <p style={{ fontSize: 11, color: '#88987b', margin: '4px 0 0', lineHeight: 1.6 }}>
+                        <p style={{ fontSize: 11, color: "var(--muted-foreground)", margin: '4px 0 0', lineHeight: 1.6 }}>
                           Visualização aproximada de como o cliente final visualiza a marca nos checkouts e no painel da operação.
                         </p>
                       </div>
@@ -1493,7 +1521,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                               <Avatar tenant={t} />
                               <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <strong style={{ fontSize: 13 }}>{t.name}</strong>
-                                <small style={{ color: '#88987b', fontSize: 11 }}>
+                                <small style={{ color: "var(--muted-foreground)", fontSize: 11 }}>
                                   {t.domain || 'URL não definida'}
                                 </small>
                               </div>
@@ -1744,7 +1772,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
               <div className="section-top" style={{ marginBottom: 20 }}>
                 <div>
                   <h2>Corretoras & Provedores Integrados</h2>
-                  <p style={{ color: '#8d9c82', fontSize: 13, margin: '2px 0 0' }}>
+                  <p style={{ color: "var(--muted-foreground)", fontSize: 13, margin: '2px 0 0' }}>
                     Status das corretoras autorizadas pela infraestrutura técnica da plataforma para a sua operação.
                   </p>
                 </div>
@@ -1904,7 +1932,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                 <div className="section-top">
                   <div>
                     <h2>Operações parceiras</h2>
-                    <p style={{ color: '#8d9c82', fontSize: 13, margin: '2px 0 0' }}>Gerencie permissões ou acesse o workspace de cada parceiro white label.</p>
+                    <p style={{ color: "var(--muted-foreground)", fontSize: 13, margin: '2px 0 0' }}>Gerencie permissões ou acesse o workspace de cada parceiro white label.</p>
                   </div>
                   <button className="secondary" onClick={() => go('tenants')}>
                     Ver todas ({tenants.length})
@@ -1949,9 +1977,9 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                           </TableCell>
                           <TableCell>
                             {t.domain ? (
-                              <strong style={{ fontSize: 13, color: '#e5ede0' }}>{t.domain}</strong>
+                              <strong style={{ fontSize: 13, color: "var(--foreground)" }}>{t.domain}</strong>
                             ) : (
-                              <span style={{ fontSize: 12, color: '#88987b' }}>URL não definida</span>
+                              <span style={{ fontSize: 12, color: "var(--muted-foreground)" }}>URL não definida</span>
                             )}
                           </TableCell>
                           <TableCell>
@@ -2116,7 +2144,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                       <div className="info-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                           <span>Modo de Manutenção Master</span>
-                          <small style={{ display: 'block', color: '#7a8972', fontSize: 11 }}>Suspende temporariamente novos acessos às lojas</small>
+                          <small style={{ display: 'block', color: "var(--muted-foreground)", fontSize: 11 }}>Suspende temporariamente novos acessos às lojas</small>
                         </div>
                         <Toggle
                           label="Manutenção"
@@ -2233,7 +2261,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                 <div className="backup-stat-card">
                   <div className="stat-label">
                     <span>Checkouts Salvos</span>
-                    <PanelsTopLeft size={16} color="#96d600" />
+                    <PanelsTopLeft size={16} color="var(--brand-accent)" />
                   </div>
                   <div className="stat-value">{checkouts.length} ofertas</div>
                   <div className="stat-sub">{checkouts.filter((c) => c.published).length} publicados online</div>
@@ -2242,7 +2270,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                 <div className="backup-stat-card">
                   <div className="stat-label">
                     <span>Último Snapshot</span>
-                    <Archive size={16} color="#96d600" />
+                    <Archive size={16} color="var(--brand-accent)" />
                   </div>
                   <div className="stat-value">
                     {backupStats?.lastBackupTime ? date(backupStats.lastBackupTime) : 'Nenhum'}
@@ -2253,7 +2281,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                 <div className="backup-stat-card">
                   <div className="stat-label">
                     <span>Total de Snapshots</span>
-                    <Layers size={16} color="#96d600" />
+                    <Layers size={16} color="var(--brand-accent)" />
                   </div>
                   <div className="stat-value">{backups.length}</div>
                   <div className="stat-sub">Retenção de 30 dias</div>
@@ -2262,7 +2290,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                 <div className="backup-stat-card">
                   <div className="stat-label">
                     <span>Domínio & Conexões</span>
-                    <Globe size={16} color="#96d600" />
+                    <Globe size={16} color="var(--brand-accent)" />
                   </div>
                   <div className="stat-value" style={{ fontSize: 14 }}>
                     {tenant.domain || `${tenant.slug}.tradingpro.io`}
@@ -2277,7 +2305,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
               <div className="section-top" style={{ marginTop: 10 }}>
                 <div>
                   <h2>Histórico de Snapshots da Operação</h2>
-                  <p style={{ color: '#8d9c82', fontSize: 13, margin: '2px 0 0' }}>
+                  <p style={{ color: "var(--muted-foreground)", fontSize: 13, margin: '2px 0 0' }}>
                     Pontos de restauração com verificação de integridade para sua operação.
                   </p>
                 </div>
@@ -2308,12 +2336,12 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                       <TableRow key={s.id}>
                         <TableCell>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <span className="square-icon" style={{ width: 34, height: 34, background: '#1c2417', color: '#96d600', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span className="square-icon" style={{ width: 34, height: 34, background: "var(--card)", color: "var(--brand-accent)", borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Archive size={16} />
                             </span>
                             <div>
                               <strong>{s.name}</strong>
-                              <small style={{ display: 'block', color: '#7f8f76', fontSize: 11 }}>ID: {s.id.slice(0, 18)}…</small>
+                              <small style={{ display: 'block', color: "var(--muted-foreground)", fontSize: 11 }}>ID: {s.id.slice(0, 18)}…</small>
                             </div>
                           </div>
                         </TableCell>
@@ -2323,7 +2351,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <span style={{ fontSize: 13, color: '#d8e5ce' }}>
+                          <span style={{ fontSize: 13, color: "var(--foreground)" }}>
                             {Math.round(s.sizeBytes / 1024)} KB · {s.tables.length} tabelas
                           </span>
                         </TableCell>
@@ -2331,7 +2359,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                           <code className="backup-hash-code">{s.hash.slice(0, 16)}…</code>
                         </TableCell>
                         <TableCell>
-                          <span style={{ fontSize: 13, color: '#a6b89e' }}>{date(s.timestamp)}</span>
+                          <span style={{ fontSize: 13, color: "var(--muted-foreground)" }}>{date(s.timestamp)}</span>
                         </TableCell>
                         <TableCell className="right">
                           <DropdownMenu>
@@ -2492,7 +2520,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                             target="_blank"
                             rel="noreferrer"
                             className="subdomain-link"
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#96d600', textDecoration: 'none', fontSize: 13 }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: "var(--brand-accent)", textDecoration: 'none', fontSize: 13 }}
                           >
                             {t.slug}.tradingpro.io
                             <ExternalLink size={12} />
@@ -2500,9 +2528,9 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                         </TableCell>
                         <TableCell>
                           {t.domain ? (
-                            <strong style={{ color: '#e5ede0', fontSize: 13 }}>{t.domain}</strong>
+                            <strong style={{ color: "var(--foreground)", fontSize: 13 }}>{t.domain}</strong>
                           ) : (
-                            <span style={{ color: '#7a8972', fontSize: 13 }}>— (Apenas subdomínio)</span>
+                            <span style={{ color: "var(--muted-foreground)", fontSize: 13 }}>— (Apenas subdomínio)</span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -2544,7 +2572,7 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
               <div className="section-top" style={{ marginBottom: 18 }}>
                 <div>
                   <h2>Registro de Atividades & Auditoria</h2>
-                  <p style={{ color: '#8d9c82', fontSize: 13, margin: '2px 0 0' }}>
+                  <p style={{ color: "var(--muted-foreground)", fontSize: 13, margin: '2px 0 0' }}>
                     Histórico cronológico de alterações, publicações de checkouts, backups e eventos da plataforma.
                   </p>
                 </div>
@@ -2752,10 +2780,10 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
                       {availableBots.map((bot) => {
                         const allowed = (editTenant.allowedBots || ['mt5-ea', 'tradingview-webhooks', 'copy-trading-engine']).includes(bot.id);
                         return (
-                          <div key={bot.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#171a15', border: '1px solid #ffffff10', borderRadius: 8 }}>
+                          <div key={bot.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: "var(--background)", border: "1px solid var(--border)", borderRadius: 8 }}>
                             <div>
-                              <strong style={{ fontSize: 13, color: '#e6ede2', display: 'block' }}>{bot.name}</strong>
-                              <small style={{ color: '#88987b', fontSize: 11 }}>{bot.category} · {bot.protocol}</small>
+                              <strong style={{ fontSize: 13, color: "var(--foreground)", display: 'block' }}>{bot.name}</strong>
+                              <small style={{ color: "var(--muted-foreground)", fontSize: 11 }}>{bot.category} · {bot.protocol}</small>
                             </div>
                             <Toggle
                               label={allowed ? 'Autorizado' : 'Bloqueado'}
@@ -2925,7 +2953,10 @@ export default function Panel({ initialView = 'overview' }: { initialView?: stri
         />
       )}
       {notice && (
-        <output className="notice">
+        <output className="notice" data-tone={noticeTone(notice)} role="status">
+          <span className="notice-symbol" aria-hidden="true">
+            {noticeTone(notice) === 'success' ? <CircleCheck size={18} /> : noticeTone(notice) === 'warning' ? <TriangleAlert size={18} /> : noticeTone(notice) === 'error' ? <CircleX size={18} /> : <Info size={18} />}
+          </span>
           <span>{notice}</span>
           <IconButton label="Fechar mensagem" onClick={() => setNotice('')}>
             <X size={16} />

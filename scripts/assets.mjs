@@ -1,4 +1,15 @@
-import { copyFileSync, cpSync, existsSync, mkdirSync } from 'node:fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import ts from 'typescript';
+import { build } from 'esbuild';
+
+await build({ entryPoints: ['prototipo/auth-preview-entry.tsx'], outfile: 'prototipo/auth-preview.js', bundle: true, minify: true, format: 'esm', define: { 'process.env.NODE_ENV': '"production"' }, jsx: 'automatic' });
+
+// Keep the archived SPA and the console on exactly the same palette generator.
+const palette = ts.transpileModule(readFileSync('lib/brand-palette.ts', 'utf8'), {
+  compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS },
+}).outputText;
+const paletteScript = `(function(exports){\n${palette}\n})(window.TradingProPalette = {});\n`;
+if (readFileSync('prototipo/palette.js', 'utf8') !== paletteScript) writeFileSync('prototipo/palette.js', paletteScript);
 
 mkdirSync('public', { recursive: true });
 if (existsSync('node_modules/bootstrap-icons/bootstrap-icons.svg')) {
@@ -6,6 +17,7 @@ if (existsSync('node_modules/bootstrap-icons/bootstrap-icons.svg')) {
     'node_modules/bootstrap-icons/bootstrap-icons.svg',
     'public/bootstrap-icons.svg',
   );
+  copyFileSync('node_modules/bootstrap-icons/bootstrap-icons.svg', 'prototipo/bootstrap-icons.svg');
 }
 
 // Ensure prototype static assets are available in public directory for Next.js
@@ -16,6 +28,12 @@ if (existsSync('prototipo')) {
     cpSync('prototipo/assets', 'public/assets', { recursive: true });
   }
   const staticFiles = [
+    'palette.js',
+    'auth.js',
+    'auth.css',
+    'bootstrap-icons.svg',
+    'auth-preview.js',
+    'auth-preview.html',
     'branding.js',
     'mock-api.js',
     'favicon.svg',
@@ -39,9 +57,11 @@ if (existsSync('prototipo')) {
     copyFileSync('prototipo/index.html', 'public/prototipo/index.html');
   }
   try {
-    const { patchBundleFile } = await import('./patch-bundle.mjs');
+    const { patchBundleFile, patchStylesFile } = await import('./patch-bundle.mjs');
     patchBundleFile('prototipo/assets/index-D08ZekFh.js');
     patchBundleFile('public/assets/index-D08ZekFh.js');
+    patchStylesFile('prototipo/assets/index-D2p3AFeV.css');
+    patchStylesFile('public/assets/index-D2p3AFeV.css');
   } catch (err) {
     console.warn('[assets.mjs] Note on patchBundleFile:', err.message);
   }

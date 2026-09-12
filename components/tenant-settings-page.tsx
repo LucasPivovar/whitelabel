@@ -3,7 +3,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import type { Tenant, Session } from '@/lib/model';
 import TenantSettings from './tenant-settings';
-import LoginPreviewMockup from './login-preview-mockup';
+import LoginPreviewMockup, { prototypeAuthUrl } from './login-preview-mockup';
 import {
   User,
   LockKeyhole,
@@ -146,9 +146,9 @@ export default function TenantSettingsPage({
             {credSuccess && (
               <div
                 style={{
-                  background: '#96d60020',
-                  border: '1px solid #96d60060',
-                  color: '#b2f022',
+                  background: "color-mix(in srgb,var(--primary) 12.549019607843137%,transparent)",
+                  border: "1px solid var(--primary)",
+                  color: "var(--brand-accent)",
                   padding: '10px 14px',
                   borderRadius: 6,
                   fontSize: 13,
@@ -175,8 +175,8 @@ export default function TenantSettingsPage({
                     placeholder="Ex: João Silva"
                     style={{
                       width: '100%',
-                      background: '#191c16',
-                      border: '1px solid #ffffff1c',
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
                       borderRadius: 6,
                       color: '#fff',
                       padding: '9px 12px',
@@ -195,8 +195,8 @@ export default function TenantSettingsPage({
                     placeholder="admin@suaoperacao.com"
                     style={{
                       width: '100%',
-                      background: '#191c16',
-                      border: '1px solid #ffffff1c',
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
                       borderRadius: 6,
                       color: '#fff',
                       padding: '9px 12px',
@@ -216,8 +216,8 @@ export default function TenantSettingsPage({
                       autoComplete="new-password"
                       style={{
                         width: '100%',
-                        background: '#191c16',
-                        border: '1px solid #ffffff1c',
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
                         borderRadius: 6,
                         color: '#fff',
                         padding: '9px 12px',
@@ -236,8 +236,8 @@ export default function TenantSettingsPage({
                       autoComplete="new-password"
                       style={{
                         width: '100%',
-                        background: '#191c16',
-                        border: '1px solid #ffffff1c',
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
                         borderRadius: 6,
                         color: '#fff',
                         padding: '9px 12px',
@@ -255,7 +255,7 @@ export default function TenantSettingsPage({
                   gap: 10,
                   marginTop: 20,
                   paddingTop: 16,
-                  borderTop: '1px solid #ffffff10',
+                  borderTop: "1px solid var(--border)",
                 }}
               >
                 <button
@@ -290,7 +290,7 @@ export default function TenantSettingsPage({
         {/* CARD 2: Seu Plano White Label */}
         <section className="settings-card">
           <div className="settings-card-header">
-            <div className="icon-wrap" style={{ background: '#1c2813', color: '#96d600' }}>
+            <div className="icon-wrap" style={{ background: "var(--muted)", color: "var(--brand-accent)" }}>
               <Zap size={22} />
             </div>
             <div>
@@ -305,8 +305,8 @@ export default function TenantSettingsPage({
           <div className="settings-card-body">
             <div
               style={{
-                background: 'linear-gradient(135deg, rgba(150, 214, 0, 0.12) 0%, rgba(20, 25, 17, 0.6) 100%)',
-                border: '1px solid rgba(150, 214, 0, 0.25)',
+                background: 'var(--muted)',
+                border: '1px solid var(--border)',
                 borderRadius: 8,
                 padding: '16px 20px',
                 marginBottom: 20,
@@ -321,7 +321,7 @@ export default function TenantSettingsPage({
                     fontSize: 11,
                     textTransform: 'uppercase',
                     letterSpacing: 1.2,
-                    color: '#96d600',
+                    color: "var(--brand-accent)",
                     fontWeight: 700,
                   }}
                 >
@@ -330,20 +330,20 @@ export default function TenantSettingsPage({
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: '4px 0 2px', color: '#fff' }}>
                   Plano Pro White Label
                 </h3>
-                <small style={{ color: '#a6b89e' }}>
+                <small style={{ color: "var(--muted-foreground)" }}>
                   Cobrança mensal · Próxima renovação automática em 30 dias
                 </small>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: '#96d600' }}>
-                  R$ 497<small style={{ fontSize: 13, fontWeight: 500, color: '#b2c8a7' }}>/mês</small>
+                <div style={{ fontSize: 22, fontWeight: 800, color: "var(--brand-accent)" }}>
+                  R$ 497<small style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>/mês</small>
                 </div>
                 <span
                   style={{
                     display: 'inline-block',
                     fontSize: 11,
-                    background: '#96d60025',
-                    color: '#aef422',
+                    background: "color-mix(in srgb,var(--primary) 14.50980392156863%,transparent)",
+                    color: "var(--brand-accent)",
                     padding: '2px 8px',
                     borderRadius: 12,
                     fontWeight: 600,
@@ -358,7 +358,7 @@ export default function TenantSettingsPage({
             <div className="info-rows">
               <div className="info-row">
                 <span>Taxa da Plataforma por Venda</span>
-                <strong style={{ color: '#96d600' }}>0% (Taxa Zero · 100% seu)</strong>
+                <strong style={{ color: "var(--brand-accent)" }}>0% (Taxa Zero · 100% seu)</strong>
               </div>
               <div className="info-row">
                 <span>Checkouts e Páginas de Venda</span>
@@ -425,7 +425,7 @@ export default function TenantSettingsPage({
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ display: 'inline-flex', background: '#141713', padding: 3, borderRadius: 8, border: '1px solid #ffffff14' }}>
+              <div style={{ display: 'inline-flex', background: "var(--background)", padding: 3, borderRadius: 8, border: "1px solid var(--border)" }}>
                 <button
                   type="button"
                   onClick={() => setPreviewDevice('desktop')}
@@ -460,7 +460,7 @@ export default function TenantSettingsPage({
                 </button>
               </div>
               <a
-                href="/login"
+                href={prototypeAuthUrl(currentDraft)}
                 target="_blank"
                 rel="noreferrer"
                 className="primary"
@@ -473,9 +473,9 @@ export default function TenantSettingsPage({
                   fontSize: 12,
                   textDecoration: 'none',
                 }}
-                title="Abrir tela de login real em nova aba"
+                title="Abrir login do protótipo em nova aba"
               >
-                Testar Login Real <ExternalLink size={14} />
+                Testar Login <ExternalLink size={14} />
               </a>
             </div>
           </div>
@@ -484,10 +484,10 @@ export default function TenantSettingsPage({
             style={{
               display: 'flex',
               justifyContent: 'center',
-              background: '#0a0c0a',
+              background: "var(--background)",
               padding: previewDevice === 'mobile' ? '28px 16px' : '16px',
               borderRadius: 8,
-              border: '1px solid #ffffff12',
+              border: "1px solid var(--border)",
               overflow: 'hidden',
               minHeight: 520,
             }}
@@ -499,8 +499,8 @@ export default function TenantSettingsPage({
                   height: 720,
                   borderRadius: 12,
                   overflow: 'hidden',
-                  border: '1px solid #ffffff18',
-                  background: '#090b09',
+                  border: "1px solid var(--border)",
+                  background: "var(--background)",
                   boxShadow: '0 20px 50px rgba(0,0,0,0.7)',
                   display: 'flex',
                   flexDirection: 'column',
@@ -510,8 +510,8 @@ export default function TenantSettingsPage({
                 <div
                   style={{
                     height: 32,
-                    background: '#141713',
-                    borderBottom: '1px solid #ffffff0d',
+                    background: "var(--background)",
+                    borderBottom: "1px solid var(--border)",
                     display: 'flex',
                     alignItems: 'center',
                     padding: '0 12px',
@@ -521,15 +521,15 @@ export default function TenantSettingsPage({
                 >
                   <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#ff5f56' }} />
                   <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#ffbd2e' }} />
-                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#27c93f' }} />
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: "var(--primary)" }} />
                   <div
                     style={{
                       margin: '0 auto',
                       width: 240,
                       height: 18,
-                      background: '#0c0f0a',
+                      background: "var(--background)",
                       borderRadius: 4,
-                      border: '1px solid #ffffff0a',
+                      border: "1px solid var(--border)",
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -537,7 +537,7 @@ export default function TenantSettingsPage({
                       color: '#666',
                     }}
                   >
-                    {currentDraft.domain ? `https://${currentDraft.domain}/login` : 'URL não definida'}
+                    /prototipo/login
                   </div>
                 </div>
                 <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
@@ -552,10 +552,10 @@ export default function TenantSettingsPage({
                   height: 660,
                   boxSizing: 'border-box',
                   borderRadius: 36,
-                  border: '8px solid #222720',
+                  border: "8px solid var(--border)",
                   boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px #ffffff1a',
                   overflow: 'hidden',
-                  background: '#090b09',
+                  background: "var(--background)",
                   position: 'relative',
                   display: 'flex',
                   flexDirection: 'column',
@@ -565,7 +565,7 @@ export default function TenantSettingsPage({
                 <div
                   style={{
                     height: 22,
-                    background: '#191c16',
+                    background: "var(--card)",
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -577,7 +577,7 @@ export default function TenantSettingsPage({
                     style={{
                       width: 80,
                       height: 10,
-                      background: '#0d0f0c',
+                      background: "var(--background)",
                       borderRadius: 10,
                     }}
                   />

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { extname, join, normalize } from 'node:path';
+import { extname, join, normalize, sep } from 'node:path';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,8 +25,10 @@ export async function GET(
   let filePath = join(root, 'index.html');
   if (slug && slug.length > 0) {
     const requested = normalize(join(root, ...slug));
-    if (requested.startsWith(root) && existsSync(requested) && statSync(requested).isFile()) {
+    if (requested.startsWith(root + sep) && existsSync(requested) && statSync(requested).isFile()) {
       filePath = requested;
+    } else if (extname(requested)) {
+      return new Response('File not found', { status: 404 });
     }
   }
 

@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const originalHt =
   'function ht({size:t=26}){return a.jsxs("div",{style:{display:"flex",alignItems:"center",gap:10},children:[a.jsxs("svg",{width:t,height:t,viewBox:"0 0 32 32",fill:"none",children:[a.jsx("rect",{width:"32",height:"32",rx:"8",fill:"#8fce00"}),a.jsx("path",{d:"M6 21 L13 14 L18 18 L26 9",stroke:"#191919",strokeWidth:"2.6",strokeLinecap:"round",strokeLinejoin:"round",fill:"none"}),a.jsx("circle",{cx:"26",cy:"9",r:"2.4",fill:"#191919"})]}),a.jsxs("span",{style:{fontWeight:700,fontSize:t*.7,letterSpacing:".5px"},children:["Trading",a.jsx("span",{style:{color:"var(--lime)"},children:"Pro"})]})]})}';
@@ -17,6 +18,7 @@ const newSplash = 'a.jsx(WlSplashWord,{})';
 export function patchBundleFile(targetPath) {
   if (!existsSync(targetPath)) return false;
   let code = readFileSync(targetPath, 'utf-8');
+  const before = code;
   let changed = false;
 
   // 1. ht and hero brand definition
@@ -49,7 +51,41 @@ export function patchBundleFile(targetPath) {
     console.log(`[Patch] Successfully replaced splash-word JSX in ${targetPath}`);
   }
 
-  if (changed) {
+  const authComponent = 'function WlAuth({mode:t}){const e=Rt(),s=yn();return window.__TP_RENDER_AUTH__(a,b,{mode:t,login:e.login,navigate:s})}';
+  if (!code.includes('function WlAuth(')) code = code.replace('function kN()', authComponent + 'function kN()');
+  code = code.replace('a.jsx(sk,{children:', 'a.jsx(sk,{basename:"/prototipo",children:');
+  code = code.replace('As?a.jsx(la,{to:"/app",replace:!0}):a.jsx(K2,{})', 'a.jsx(la,{to:{pathname:"/login",search:window.location.search},replace:!0})');
+  code = code.replace('a.jsx(jg,{children:a.jsx(t_,{})})', 'a.jsx(WlAuth,{mode:"login"})');
+  code = code.replace('a.jsx(jg,{children:a.jsx(G2,{})})', 'a.jsx(WlAuth,{mode:"forgot"})');
+  code = code.replace('element:a.jsx(Z2,{})', 'element:a.jsx(WlAuth,{mode:"reset"})');
+  code = code.replace('t1=function(t){return"/"+t}', 't1=function(t){return"/prototipo/"+t}');
+  code = code.replace(/"\/(?!prototipo\/)([^"\n]+\.(?:mp4|png|jpg|jpeg))"/g, '"/prototipo/$1"');
+  code = code.replace(/rgba\(150,\s*214,\s*0,\s*([.\d]+)\)/g, 'rgba(var(--brand-rgb),$1)');
+  code = code.replace(/rgba\(143,\s*206,\s*0,\s*([.\d]+)\)/g, 'rgba(var(--brand-rgb),$1)');
+  code = code.replaceAll('color:"var(--lime)"', 'color:"var(--brand-accent)"');
+  code = code.replaceAll('background:"var(--lime)"', 'background:"var(--brand-primary)"');
+  code = code.replaceAll('color:"var(--dark)"', 'color:"var(--brand-on-primary)"');
+  // Lightweight Charts parses color strings itself, so resolve CSS tokens at its boundary.
+  const colorResolver = 'if(t.includes("var("))t=t.replace(/var\\((--[\\w-]+)\\)/g,(_,e)=>getComputedStyle(document.documentElement).getPropertyValue(e).trim());';
+  if (!code.includes(colorResolver)) code = code.replace('function va(t){', 'function va(t){' + colorResolver);
+  code = code.replace('layout:{background:{color:"#202020"},textColor:"#9a9a9a",fontFamily:"Inter, sans-serif"}', 'layout:{background:{color:"var(--panel)"},textColor:"var(--muted)",fontFamily:getComputedStyle(document.documentElement).getPropertyValue("--font-body")}');
+  code = code.replaceAll('color:"#2b2b2b"', 'color:"var(--panel-2)"');
+  code = code.replaceAll('downColor:"#ff4d4d"', 'downColor:"var(--brand-complement)"');
+  code = code.replaceAll('borderDownColor:"#ff4d4d"', 'borderDownColor:"var(--brand-complement)"');
+  code = code.replaceAll('wickDownColor:"#ff4d4d"', 'wickDownColor:"var(--brand-complement)"');
+  code = code.replace(/#(?:96d600|8fce00|c2f942|dcff7a)(?![\da-f])/gi, 'var(--brand-accent)');
+  // Canvas fill styles need concrete colors even when the chart parser accepts CSS tokens.
+  const chartStart = code.indexOf('layout:{background:{color:"var(--panel)"}');
+  const chartEnd = code.indexOf('return n.current=j,i.current=T', chartStart);
+  if (chartStart !== -1 && chartEnd !== -1) {
+    const options = code.slice(chartStart, chartEnd).replace(/:"var\((--[\w-]+)\)"/g,
+      (_, token) => `:getComputedStyle(document.documentElement).getPropertyValue("${token}").trim()`);
+    code = code.slice(0, chartStart) + options + code.slice(chartEnd);
+  }
+  code = code.replace('stroke:"#191919",strokeWidth:"2.6"', 'stroke:"var(--brand-on-primary)",strokeWidth:"2.6"');
+  code = code.replace('r:"2.4",fill:"#191919"', 'r:"2.4",fill:"var(--brand-on-primary)"');
+
+  if (code !== before) {
     writeFileSync(targetPath, code, 'utf-8');
     console.log(`[Patch] Saved updates to ${targetPath}`);
   } else {
@@ -58,6 +94,7 @@ export function patchBundleFile(targetPath) {
   return true;
 }
 
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 const targets = [
   join(process.cwd(), 'prototipo', 'assets', 'index-D08ZekFh.js'),
   join(process.cwd(), 'public', 'assets', 'index-D08ZekFh.js'),
@@ -67,3 +104,17 @@ for (const target of targets) {
   patchBundleFile(target);
 }
 console.log('All bundle patches processed.');
+}
+
+export function patchStylesFile(targetPath) {
+  const before = readFileSync(targetPath, 'utf8');
+  const accent = /^(?:96d600|8fce00|79ae00|8dc800|76a800|7ea600|9dd600|9fd71d|9bdc18|aee735|b6f13a|a9c771|a9c971|b3cd8c)$/i;
+  const surfaces = /^(?:191919|202020|262626|101210|121612|121a12|172000|2f3a12|070807|0d0f0d|090a09|0e120e|030403|060706|1e211e|121412|101410|1c221c|0f120f|090b09|0b0d0b|070a07|0d110d)$/i;
+  const code = before.replace(/#([\da-f]{6})([\da-f]{2})?\b/gi, (match, value, alpha) => {
+    const opacity = alpha ? parseInt(alpha, 16) / 255 : 1;
+    if (accent.test(value)) return alpha ? `rgba(var(--brand-rgb),${opacity})` : 'var(--brand-accent)';
+    if (surfaces.test(value)) return alpha ? `color-mix(in srgb,var(--panel) ${opacity * 100}%,transparent)` : 'var(--panel)';
+    return match;
+  }).replace(/rgba\(150,\s*214,\s*0,\s*([.\d]+)\)/g, 'rgba(var(--brand-rgb),$1)');
+  if (code !== before) writeFileSync(targetPath, code);
+}

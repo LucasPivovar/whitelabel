@@ -19,8 +19,17 @@ const mime = {
 
 createServer((request, response) => {
   const pathname = decodeURIComponent(new URL(request.url || "/", "http://localhost").pathname);
-  const requested = normalize(join(root, pathname));
-  const file = requested.startsWith(root) && existsSync(requested) && statSync(requested).isFile()
+  if (!pathname.startsWith('/prototipo')) {
+    response.writeHead(302, { Location: "/prototipo" + (pathname === '/' ? '' : pathname) + new URL(request.url, "http://localhost").search });
+    response.end();
+    return;
+  }
+  const requested = normalize(join(root, pathname.replace(/^\/prototipo(?:\/|$)/, "/")));
+  const found = requested.startsWith(root) && existsSync(requested) && statSync(requested).isFile();
+  if (!found && extname(requested)) {
+    response.writeHead(404); response.end('File not found'); return;
+  }
+  const file = found
     ? requested
     : join(root, "index.html");
 

@@ -31,8 +31,8 @@
   gap: 48px;
   padding: 56px;
   background:
-    radial-gradient(circle at 15% 15%, rgba(150, 214, 0, 0.12) 0%, transparent 65%),
-    radial-gradient(circle at 85% 85%, rgba(150, 214, 0, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 15% 15%, rgba(150, 214, 0, 0.06) 0%, transparent 65%),
+    radial-gradient(circle at 85% 85%, rgba(150, 214, 0, 0.02) 0%, transparent 50%),
     #111410;
 }
 

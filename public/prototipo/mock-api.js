@@ -328,7 +328,7 @@
       saveState();
       return json({ user: state.user });
     }
-    if (path === "/settings/deriv/oauth-start") return json({ url: "/app/settings" });
+    if (path === "/settings/deriv/oauth-start") return json({ url: "/prototipo/app/settings" });
     if (path === "/settings/deriv/oauth-callback") return json({ user: state.user });
     if (path === "/settings/deriv/accounts") {
       return json({
@@ -527,7 +527,7 @@
 
   const realFetch = window.fetch.bind(window);
   window.fetch = function (input, options) {
-    const raw = typeof input === "string" ? input : input.url;
+    const raw = typeof input === "string" || input instanceof URL ? String(input) : input.url;
     const url = new URL(raw, window.location.href);
     if (url.pathname.startsWith("/api/")) return Promise.resolve(mockApi(url, options || {}));
     if (url.hostname === "api.pagar.me") return Promise.resolve(json({ id: "card_prototype_token" }));
@@ -537,14 +537,4 @@
   localStorage.setItem("tp_lang_chosen", "1");
   localStorage.setItem("tp_tour_done", "1");
 
-  function relaxPrototypeLogin() {
-    if (window.location.pathname !== "/login") return;
-    const form = document.querySelector("form");
-    if (!form) return;
-    for (const input of form.querySelectorAll("input[required]")) input.removeAttribute("required");
-  }
-
-  new MutationObserver(relaxPrototypeLogin).observe(document.documentElement, { childList: true, subtree: true });
-  window.addEventListener("popstate", relaxPrototypeLogin);
-  window.setTimeout(relaxPrototypeLogin, 0);
 })();

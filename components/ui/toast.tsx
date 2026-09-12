@@ -141,19 +141,19 @@ function ToastIcon({ type }: { type: string | undefined }) {
   let icon: React.ReactNode = null;
 
   if (type === 'success') {
-    icon = <CircleCheckIcon aria-hidden="true" />;
+    icon = <CircleCheckIcon className="text-[#4ade80]" aria-hidden="true" />;
   }
 
   if (type === 'info') {
-    icon = <InfoIcon aria-hidden="true" />;
+    icon = <InfoIcon className="text-[#f4f4f5]" aria-hidden="true" />;
   }
 
   if (type === 'warning') {
-    icon = <TriangleAlertIcon aria-hidden="true" />;
+    icon = <TriangleAlertIcon className="text-[#facc15]" aria-hidden="true" />;
   }
 
   if (type === 'error') {
-    icon = <OctagonXIcon className="text-destructive" aria-hidden="true" />;
+    icon = <OctagonXIcon className="text-[#fb7185]" aria-hidden="true" />;
   }
 
   if (type === 'loading') {
@@ -178,7 +178,7 @@ function ToastList() {
   const { toasts } = ToastPrimitive.useToastManager();
 
   return toasts.map((toastItem) => (
-    <Toast key={toastItem.id} toast={toastItem}>
+    <Toast key={toastItem.id} toast={toastItem} data-tone={toastItem.type || 'info'}>
       <ToastContent>
         <ToastIcon type={toastItem.type} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
